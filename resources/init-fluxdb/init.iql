@@ -1,0 +1,23 @@
+CREATE DATABASE "thingy-db-red"
+USE "thingy-db-red"
+SHOW DATABASES
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651417437470260
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651357442053513
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651297446732134
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651237451033336
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651177455595508
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651117459852390
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651057464156996
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571650997469200553
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571650937474295061
+INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571650877479396186
+INSERT sound,location=ff-office foo=111 1571651452970701281
+INSERT sound,location=ff-office foo=111 1571651392975572519
+INSERT sound,location=ff-office foo=111 1571651332980381854
+INSERT sound,location=ff-office foo=111 1571651272984879058
+INSERT sound,location=ff-office foo=111 1571651212988880145
+INSERT sound,location=ff-office foo=111 1571651152992980177
+INSERT sound,location=ff-office foo=111 1571651092997007256
+INSERT sound,location=ff-office foo=111 1571651033001070506
+INSERT sound,location=ff-office foo=111 1571650973005134794
+INSERT sound,location=ff-office foo=111 1571650913009651936

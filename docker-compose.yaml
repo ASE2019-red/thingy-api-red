@@ -1,7 +1,7 @@
 version: "3"
 
 volumes:
-  flux_data:
+  influx_data:
   api_data:
 
 networks:
@@ -10,21 +10,29 @@ networks:
 
 services:
   influx:
-    image: influxdb:alpine
+    image: influxdb:1.7-alpine
     ports:
-      - 2003:2003
       - 8083:8083
       - 8086:8086
     volumes:
-      - flux_data:/var/lib/influxdb
+      - influx_data:/var/lib/influxdb
+      - ./resources/init-fluxdb:/docker-entrypoint-initdb.d
+      - /etc/localtime:/etc/localtime:ro
     environment:
       INFLUXDB_ADMIN_ENABLED: "true"
+      INFLUXDB_ADMIN_USER: "thingy-db-red"
+      INFLUXDB_ADMIN_PASSWORD: "thingy-pw"
+      INFLUXDB_HTTP_AUTH_ENABLED: "false"
 
   api:
     image: thingy-api-red
     build: ./
     ports:
       - 8000:8000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - influx
     environment:
       NODE_PORT: 8000
       NODE_ENV: "development"
