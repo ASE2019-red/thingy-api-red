@@ -19,4 +19,11 @@ To select all data stored in the dummy gravity measurement, do
     $ http --form POST http://localhost:8086/query db=thingy-db-red q="select * from gravity"
 
 You can do this for the sound mesaurement in the same manner. The bootstrap data is located under `resources/init-fluxdb/init.iql`.
-For more information visit https://docs.influxdata.com/influxdb/v1.7/introduction/getting-started/.
+For more information visit https://docs.influxdata.com/influxdb/v1.7/introduction/getting-started/. A good documentation for
+the InfluxDB Docker Image can be found under https://hub.docker.com/_/influxdb/.
+
+#### Cleanup Docker volumes (local development)
+To cleanup stored content which is stored inside the named volume called `influx_data`, you can execute the following command:
+
+    $ docker-compose rm -svf influx     # Stops the InfluxDB first
+    $ docker volume rm -f influx_data   # Removes the stored data

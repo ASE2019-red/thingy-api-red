@@ -23,6 +23,7 @@
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "influx": "5.4.2",
     "koa": "^2.9.0",
     "koa-router": "^7.4.0"
   }
