@@ -2,8 +2,29 @@
 
 ## API
 
+### Draft API definition
+
+`/measurement/:name/` => Get all measurements of sensor   
+`/measurement/:name/?from=<date>&to=<date>` => Get measurement between timerange
+
+`/users/` => Get all users  
+`/users/:name` => Get specific user
 
 ## Persistence
+The two database systems can be started for local development via `docker-compose`. The ports are published, which makes it possible to access the databases. 
+
+For the productive environment, the microservices are located in a common overlay network, which makes external access impossible.
+
+### PostgreSQL
+To store simple relational data, this project uses PostgreSQL with [TypeORM](https://github.com/typeorm/typeorm).
+
+To run the database locally, do:
+
+    $ docker-compose up -d postgres
+    
+To connect to the database, do:
+
+    $ PGPASSWORD=mysecretpassword psql -h localhost thingy-db-red postgres
 
 ### InfluxDB
 InfluxDB is used to store timeseries data which will be consumed form MQTT broker.

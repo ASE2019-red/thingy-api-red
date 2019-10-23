@@ -1,13 +1,13 @@
 version: "3"
 
+networks:
+  default:
+    external: false
+
 volumes:
   influx_data:
   postgres_data:
   api_data:
-
-networks:
-  default:
-    external: false
 
 services:
   influx:
