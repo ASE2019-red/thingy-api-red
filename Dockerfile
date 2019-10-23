@@ -7,4 +7,4 @@ RUN npm install
 
 COPY . .
 
-CMD [ "npm", "run", "watch-server" ]
+CMD [ "npm", "run", "run-server" ]
