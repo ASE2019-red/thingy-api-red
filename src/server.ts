@@ -7,13 +7,14 @@ import { mqtt_conn } from './persistence/mqtt';
 import { InfluxDB } from 'influx';
 import { AsyncMqttClient } from 'async-mqtt';
 import { Connection } from 'typeorm';
+import { MqttClient } from 'mqtt';
 
 async function bootstrap(samples: boolean) {
     try {
         // Initialize the database
         let influx: InfluxDB = await influx_conn();
         let pg: Connection = await pg_conn();
-        let mqtt: AsyncMqttClient = await mqtt_conn();
+        let mqtt: MqttClient = await mqtt_conn();
 
         // Initialize the Koa application
         const app: Koa = new Koa();
