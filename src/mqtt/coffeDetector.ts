@@ -8,21 +8,21 @@ import Vector from "./vector";
 const NO_ADDITIONAL_ACCELERATION = new Vector(0, 0, 1000)
 
 // number of sensor ticks over which we average the acceleration
-const AVERAGE_WINDOW = 25
+const AVERAGE_WINDOW = 25;
 // acceleration speed above which we consider a coffee is being produced
 // if it is hold up for longer than 
 // COFFE_PRODUCED_MINIMAL_DURATION_THRESHOLD * AVERAGE_WINDOW sensor ticks
 const COFFE_PRODUCED_ACCELERATION_THRESHOLD = 38;
 // minimum number of average windows over which the acceleration must be higher
 // than COFFE_PRODUCED_ACCELERATION_THRESHOLD such that we assumed a coffee is being produced
-const COFFE_PRODUCED_MINIMAL_DURATION_THRESHOLD = 4
+const COFFE_PRODUCED_MINIMAL_DURATION_THRESHOLD = 4;
 // minimum number of average windows over which the acceleration must be lower
 // than COFFE_PRODUCED_ACCELERATION_THRESHOLD such that we assumed the coffee is finished
-const COFFE_PRODUCED_STOP_THRESHOLD = 3
+const COFFE_PRODUCED_STOP_THRESHOLD = 3;
 
 class CoffeeDetector {
     private mqttClient: MQTTTopicClient;
-    private accelerationSensorTopic: string
+    private accelerationSensorTopic: string;
     private averageWindow: number[] = [];
     private consecutiveWindowsAboveThreshold: number = 0;
     private coffeInProduction: boolean = false;
@@ -46,10 +46,11 @@ class CoffeeDetector {
     }
 
     receiveMotionData = (rawData: Buffer) => {
-        const numbers = rawData.toString().trim().split(',')
-        const accelerationX = parseInt(numbers[0])
-        const accelerationY = parseInt(numbers[1])
-        const accelerationZ = parseInt(numbers[2])
+        // todo: find out how we can get numbers from mqtt, instead of a string...
+        const numbers = rawData.toString().trim().split(',');
+        const accelerationX = parseInt(numbers[0]);
+        const accelerationY = parseInt(numbers[1]);
+        const accelerationZ = parseInt(numbers[2]);
         const accelerationVector = new Vector(accelerationX, accelerationY, accelerationZ)
         const effectiveAccelerationVector = accelerationVector.minus(NO_ADDITIONAL_ACCELERATION);
         const effectiveAcceleration = effectiveAccelerationVector.norm()
@@ -73,7 +74,7 @@ class CoffeeDetector {
     detectIsProducingCoffee(averageWindowAcceleration: number) {
         if(averageWindowAcceleration < COFFE_PRODUCED_ACCELERATION_THRESHOLD) {
             // acceleration goes below threshold, after a long window over the threshold
-            if(this.coffeInProduction) {
+            if (this.coffeInProduction) {
                 this.windowsBelowThresholdAfterStart += 1;
                 // below threshold for a longer time 
                 // => coffee production is finished
@@ -88,7 +89,7 @@ class CoffeeDetector {
         } else {
             // case above threshold:
             this.consecutiveWindowsAboveThreshold += 1;
-            if(this.consecutiveWindowsAboveThreshold >= COFFE_PRODUCED_MINIMAL_DURATION_THRESHOLD) {
+            if (this.consecutiveWindowsAboveThreshold >= COFFE_PRODUCED_MINIMAL_DURATION_THRESHOLD) {
                 this.coffeInProduction = true;
             }
         }

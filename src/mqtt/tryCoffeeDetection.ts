@@ -1,12 +1,13 @@
 import MQTTTopicClient from "./mqtt";
 import CoffeeDetector from "./coffeDetector";
-import * as Koa from 'koa';
 
+/**
+ * Script to test out the coffee detection. Usage: 
+ * COFFEE_TOPIC="<full Raw motion data characteristic topic name, including device>" yarn ts-node ./src/mqtt/tryCoffeeDetection.ts
+ */
 const mqttClient = new MQTTTopicClient
 
 mqttClient.connect();
-//mqtt_conn();
 
-const coffeeDetector = new CoffeeDetector("d1:d5:9f:34:cf:93/Thingy Motion Service/Thingy Motion Raw data", 
-                                          () => console.log("Coffee made!"), mqttClient)
-console.log("started");
+new CoffeeDetector(process.env.COFFEE_TOPIC, 
+                    () => console.log("Coffee made!"), mqttClient)
