@@ -1,20 +1,18 @@
-import * as mqtt from 'mqtt';
+import * as mqtt from 'async-mqtt';
+import { AsyncMqttClient } from 'async-mqtt';
 import { config } from '../config';
 
 export const mqtt_conn = async () => {
-    var mqtt_conn = mqtt.connect({
+    const mqtt_conn: AsyncMqttClient = mqtt.connect({
         host: config.mqtt.hostname,
         port: config.mqtt.port,
         username: config.mqtt.user,
         password: config.mqtt.password,
-    })
+    });
 
-    // mqtt_conn.on('connect', function () {
-    // })
+    // TODO: Do connection check
+    //
 
-    // mqtt_conn.on('message', function (topic, message) {
-    //     console.log(message.toString())
-    // })
-
+    console.log("Successfully connected to MQTT broker");
     return mqtt_conn;
 };

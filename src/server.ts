@@ -4,16 +4,19 @@ import { routes } from './routes';
 import { qa_routes } from '../test/routes';
 import { pg_conn, influx_conn } from './persistence/database';
 import { mqtt_conn } from './persistence/mqtt';
+import { InfluxDB } from 'influx';
+import { AsyncMqttClient } from 'async-mqtt';
+import { Connection } from 'typeorm';
 
 async function bootstrap(samples: boolean) {
     try {
         // Initialize the database
-        let influx = await influx_conn();
-        let pg = await pg_conn();
-        let mqtt = await mqtt_conn();
+        let influx: InfluxDB = await influx_conn();
+        let pg: Connection = await pg_conn();
+        let mqtt: AsyncMqttClient = await mqtt_conn();
 
         // Initialize the Koa application
-        const app = new Koa();
+        const app: Koa = new Koa();
 
         // Logger
         app.use(async (ctx, next) => {

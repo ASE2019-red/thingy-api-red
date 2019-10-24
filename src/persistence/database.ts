@@ -1,10 +1,10 @@
 import * as Influx from 'influx';
+import { createConnection, Connection } from 'typeorm';
 import { config } from '../config';
-import { createConnection } from 'typeorm';
 import { User } from '../models/user';
 
 export const influx_conn = async () => {
-    const c_influx = new Influx.InfluxDB({
+    const c_influx: Influx.InfluxDB = new Influx.InfluxDB({
         host: config.flux.hostname,
         database: config.flux.dbname,
     });
@@ -21,7 +21,7 @@ export const influx_conn = async () => {
 };
 
 export const pg_conn = async () => {
-    let c_pg = await createConnection({
+    const c_pg: Connection = await createConnection({
         type: 'postgres',
         host: config.postgres.hostname,
         username: config.postgres.user,
@@ -30,9 +30,8 @@ export const pg_conn = async () => {
         entities: [User,],
         logging: ['error'],
         synchronize: true,
-    }).then(c => {
-        console.log(`Successfully connected to PostgreSQL`)
     });
 
+    console.log(`Successfully connected to PostgreSQL`)
     return c_pg;
 };
