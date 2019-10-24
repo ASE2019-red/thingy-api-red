@@ -31,7 +31,7 @@ const config = {
         password: process.env.MQTT_PW || '061526c657',
         gatewayName: process.env.MQTT_GATEWAY_NAME || 'BLE2MQTT-7214',
         macThingy1: process.env.MQTT_THINGY1_MAC || 'e8:e0:72:6b:92:a3',
-        macThingy2: process.env.MQTT_THINGY2_MAC || 'e3:dc:75:9c:04:6f',
+        macThingy2: process.env.MQTT_THINGY2_MAC || 'e3:dc:75:9c:04:6f'
     },
 };
 

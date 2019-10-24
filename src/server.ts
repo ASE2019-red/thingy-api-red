@@ -3,18 +3,14 @@ import { config } from './config';
 import { routes } from './routes';
 import { qa_routes } from '../test/routes';
 import { pg_conn, influx_conn } from './persistence/database';
-import { mqtt_conn } from './persistence/mqtt';
 import { InfluxDB } from 'influx';
-import { AsyncMqttClient } from 'async-mqtt';
 import { Connection } from 'typeorm';
-import { MqttClient } from 'mqtt';
 
 async function bootstrap(samples: boolean) {
     try {
         // Initialize the database
         let influx: InfluxDB = await influx_conn();
         let pg: Connection = await pg_conn();
-        let mqtt: MqttClient = await mqtt_conn();
 
         // Initialize the Koa application
         const app: Koa = new Koa();
@@ -41,7 +37,7 @@ async function bootstrap(samples: boolean) {
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
-        app.context.mqtt = mqtt;
+        //app.context.mqtt = mqtt;
 
         // Startup app
         app.use(routes);
