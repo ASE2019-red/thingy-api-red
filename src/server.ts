@@ -1,16 +1,28 @@
 import * as Koa from 'koa';
-import { config } from './config';
+import { loadConfig } from './config';
 import { routes } from './routes';
 import { qa_routes } from '../test/routes';
 import { pg_conn, influx_conn } from './persistence/database';
 import { InfluxDB } from 'influx';
-import { Connection } from 'typeorm';
+import { Connection, getManager, Repository } from 'typeorm';
+import MQTTTopicClient from './mqtt/mqtt';
+import CoffeeDetector from './mqtt/coffeDetector';
+import { CoffeeEvent } from './models/coffeeEvent';
 
 async function bootstrap(samples: boolean) {
     try {
+        const config = loadConfig();
         // Initialize the database
-        let influx: InfluxDB = await influx_conn();
-        let pg: Connection = await pg_conn();
+        const influx: InfluxDB = await influx_conn(config.flux);
+        const pg: Connection = await pg_conn(config.postgres);
+        const mqtt = new MQTTTopicClient();
+        await mqtt.connect(config.mqtt);
+
+        new CoffeeDetector(config.mqtt.accelerationSensorTopic, () => {
+            const coffeeEventRepo: Repository<CoffeeEvent> = getManager().getRepository(CoffeeEvent);
+            const newEvent = new CoffeeEvent();
+            coffeeEventRepo.save(newEvent);
+        }, mqtt)
 
         // Initialize the Koa application
         const app: Koa = new Koa();
@@ -37,7 +49,6 @@ async function bootstrap(samples: boolean) {
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
-        //app.context.mqtt = mqtt;
 
         // Startup app
         app.use(routes);

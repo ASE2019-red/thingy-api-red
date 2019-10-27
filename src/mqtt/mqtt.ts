@@ -1,18 +1,17 @@
 import * as mqtt from 'async-mqtt';
 import { AsyncMqttClient, ISubscriptionGrant } from 'async-mqtt';
-import { config } from '../config';
 
 export class MQTTTopicClient {
     private client?: AsyncMqttClient;
     private topicMessageCallbacks = new Map<string, (message: Buffer) => void>() 
 
-    connect = async () => {
+    connect = async (config: {hostname: string, port: string, user: string, password: string}) => {
         this.client = mqtt.connect({
-            host: config.mqtt.hostname,
-            port: config.mqtt.port,
+            host: config.hostname,
+            port: config.port,
             protocol: 'mqtt',
-            username: config.mqtt.user,
-            password: config.mqtt.password,
+            username: config.user,
+            password: config.password,
         });
     
         this.client.on('error', (err: Error) => {

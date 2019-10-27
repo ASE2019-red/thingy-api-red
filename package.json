@@ -30,6 +30,7 @@
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "dotenv": "8.2.0",
     "koa": "^2.9.0",
     "koa-router": "^7.4.0"
   }
