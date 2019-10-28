@@ -31,6 +31,7 @@
     "typescript": "^3.6.4"
   },
   "dependencies": {
+    "jerzy": "0.2.1",
     "koa": "^2.9.0",
     "koa-router": "^7.4.0"
   }

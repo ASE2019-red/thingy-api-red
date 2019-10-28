@@ -1,10 +1,17 @@
+import { createReadStream } from 'fs';
+import { createInterface } from 'readline';
 import MQTTTopicClient from '../mqtt/mqtt';
 import Vector from '../mqtt/vector';
-import { readFileSync, createReadStream } from 'fs';
-import { createInterface } from 'readline';
+
+// declare var jerzy: any;
 
 export class KSGravityDetector {
     private reference: number[][];
+    private frameSize: number;
+    private frame: any[] = [];
+    private ready: boolean = false;
+    private yieldCnt: number = 0;
+    private currYeld: number;
 
     constructor(private topic: string,
                 private onCoffeeProduced: () => void,
@@ -20,8 +27,15 @@ export class KSGravityDetector {
         const y = rawData.readFloatLE(4);
         const z = rawData.readFloatLE(8);
         const vector = [x, y, z];
-        // console.log(x, y, z);
-        // console.log(rawData);
+        if (this.ready) {
+            if (this.frame.length == this.frameSize) {
+                this.frame.shift();
+            }
+            this.frame.push(vector);
+            if (this.yieldCnt <= 0) {
+                this.ksTest();
+            }
+        }
     }
 
     private loadReference(): void {
@@ -34,7 +48,23 @@ export class KSGravityDetector {
             const z = parseFloat(arr[2]);
             this.reference.push([x, y, z]);
         });
-        readInterface.on('close', () => console.log(this.reference));
+        readInterface.on('close', () => {
+            this.ready = true;
+            this.frameSize = this.reference.length;
+            this.yieldCnt = this.frameSize / 2;
+        });
+    }
+
+    private ksTest(): void {
+        const jerzy = require('jerzy');
+        const k = new jerzy.Kolomogorov();
+        const ref = new jerzy.Vector(this.reference);
+        const sample = new jerzy.Vector(this.frame);
+        const ksTest = new jerzy.Nonparametric.kolmogorovSmirnov(ref, this.frame);
+        if (ksTest.d <= 0.5) {
+            this.currYeld = this.yieldCnt;
+        }
+
     }
 
 }
