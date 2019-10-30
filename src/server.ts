@@ -59,7 +59,7 @@ async function bootstrap(samples: boolean) {
         return app;
 
     } catch (err) {
-        console.error(`Error occured during startup. \n\t${err}`);
+        console.error(`Error occurred during startup. \n\t${err}`);
         process.exit(1);
     }
 };

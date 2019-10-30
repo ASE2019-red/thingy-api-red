@@ -8,19 +8,19 @@ export function loadConfig() {
         prettyLog: process.env.NODE_ENV == 'development',
 
         flux: {
-            hostname: process.env.FLUXDB_HOST,
-            port: process.env.FLUXDB_PORT,
-            dbname: process.env.FLUXDB_DBNAME,
-            user: process.env.FLUXDB_USER,
-            password: process.env.FLUXDB_PW,
+            hostname: process.env.INFLUXDB_HOST,
+            port: process.env.INFLUXDB_PORT,
+            dbname: process.env.INFLUXDB_DBNAME,
+            user: process.env.INFLUXDB_ADMIN_USER,
+            password: process.env.INFLUXDB_ADMIN_PASSWORD,
         },
 
         postgres: {
             hostname: process.env.POSTGRES_HOST,
             port: parseInt(process.env.POSTGRES_PORT),
-            dbname: process.env.POSTGRES_DBNAME,
+            dbname: process.env.POSTGRES_DB,
             user: process.env.POSTGRES_USER,
-            password: process.env.POSTGRES_PW,
+            password: process.env.POSTGRES_PASSWORD,
         },
 
         mqtt: {
