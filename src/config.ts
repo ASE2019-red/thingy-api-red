@@ -1,6 +1,5 @@
 import * as dotenv from 'dotenv';
 
-// TODO: move to JSON configuration
 export function loadConfig() {
     dotenv.config();
     return {
@@ -28,7 +27,7 @@ export function loadConfig() {
             port: process.env.MQTT_PORT,
             user: process.env.MQTT_USER,
             password: process.env.MQTT_PW,
-            // todo: later we should store a list of all available sensors and their topics in the db
+            // TODO: later we should store a list of all available sensors and their topics in the db
             accelerationSensorTopic: process.env.ACCELERATION_SENSOR_TOPIC
         },
     };
