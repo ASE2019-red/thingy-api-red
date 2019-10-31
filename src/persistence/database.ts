@@ -1,33 +1,35 @@
 import * as Influx from 'influx';
 import { createConnection, Connection } from 'typeorm';
-import { config } from '../config';
 import { User } from '../models/user';
+import { CoffeeEvent } from '../models/coffeeEvent';
 
-export const influx_conn = async () => {
+export const influx_conn = async (config: {hostname: string, dbname: string }) => {
     const c_influx: Influx.InfluxDB = new Influx.InfluxDB({
-        host: config.flux.hostname,
-        database: config.flux.dbname,
+        host: config.hostname,
+        database: config.dbname,
     });
 
     await c_influx.getDatabaseNames().then(names => {
-        if (names.includes(config.flux.dbname)) {
+        if (names.includes(config.dbname)) {
             console.log(`Successfully connected to InfluxDB`)
         } else {
-            throw Error(`Cannot find database ${config.flux.dbname}`);
+            throw Error(`Cannot find database ${config.dbname}`);
         }
     });
 
     return c_influx;
 };
 
-export const pg_conn = async () => {
+export const pg_conn = async (config: {hostname: string, port: number, user: string, dbname: string 
+                                       password: string}) => {
     const c_pg: Connection = await createConnection({
         type: 'postgres',
-        host: config.postgres.hostname,
-        username: config.postgres.user,
-        database: config.postgres.dbname,
-        password: config.postgres.password,
-        entities: [User,],
+        host: config.hostname,
+        port: config.port,
+        username: config.user,
+        database: config.dbname,
+        password: config.password,
+        entities: [User, CoffeeEvent],
         logging: ['error'],
         synchronize: true,
     });

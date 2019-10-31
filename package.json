@@ -27,7 +27,8 @@
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
     "typeorm": "0.2.20",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "dotenv": "8.2.0"
   },
   "dependencies": {
     "koa": "^2.9.0",
