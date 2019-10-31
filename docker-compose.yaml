@@ -13,40 +13,34 @@ services:
   influx:
     image: influxdb:1.7-alpine
     ports:
-      - 8086:8086
+      - ${INFLUXDB_PORT}:8086
     volumes:
       - influx_data:/var/lib/influxdb
       - ./resources/init-fluxdb:/docker-entrypoint-initdb.d
       - /etc/localtime:/etc/localtime:ro
-    environment:
-      INFLUXDB_ADMIN_USER: fluxdb-user
-      INFLUXDB_ADMIN_PASSWORD: mysecretpassword
-      INFLUXDB_HTTP_AUTH_ENABLED: "false"
+    env_file: [.env]
 
   postgres:
     image: postgres:11-alpine
     ports:
-      - 5432:5432
+      - ${POSTGRES_PORT}:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./resources/init-postgres:/docker-entrypoint-initdb.d
-    environment:
-      POSTGRES_DB: thingy-db-red
-      POSTGRES_PASSWORD: mysecretpassword
+    env_file: [.env]
 
   api:
     image: thingy-api-red
     build: ./
     restart: on-failure
     ports:
-      - 8000:8000
+      - ${NODE_PORT}:8000
     volumes:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
       - influx
       - postgres
+    env_file: [.env]
     environment:
-      NODE_PORT: 8000
-      NODE_ENV: "development"
-      FLUXDB_HOST: influx
+      INFLUXDB_HOST: influx
       POSTGRES_HOST: postgres

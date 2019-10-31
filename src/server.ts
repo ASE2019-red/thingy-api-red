@@ -1,17 +1,31 @@
 import * as Koa from 'koa';
-import { config } from './config';
+import { loadConfig } from './config';
 import { routes } from './routes';
 import { qa_routes } from '../test/routes';
-import { pg_conn, influx_conn } from './database/database';
+import { pg_conn, influx_conn } from './persistence/database';
+import { InfluxDB } from 'influx';
+import { Connection, getManager, Repository } from 'typeorm';
+import MQTTTopicClient from './mqtt/mqtt';
+import CoffeeDetector from './mqtt/coffeDetector';
+import { CoffeeEvent } from './models/coffeeEvent';
 
 async function bootstrap(samples: boolean) {
     try {
+        const config = loadConfig();
         // Initialize the database
-        let influx = await influx_conn();
-        let pg = await pg_conn();
+        const influx: InfluxDB = await influx_conn(config.flux);
+        const pg: Connection = await pg_conn(config.postgres);
+        const mqtt = new MQTTTopicClient();
+        await mqtt.connect(config.mqtt);
+
+        new CoffeeDetector(config.mqtt.accelerationSensorTopic, () => {
+            const coffeeEventRepo: Repository<CoffeeEvent> = getManager().getRepository(CoffeeEvent);
+            const newEvent = new CoffeeEvent();
+            coffeeEventRepo.save(newEvent);
+        }, mqtt)
 
         // Initialize the Koa application
-        const app = new Koa();
+        const app: Koa = new Koa();
 
         // Logger
         app.use(async (ctx, next) => {
@@ -45,7 +59,7 @@ async function bootstrap(samples: boolean) {
         return app;
 
     } catch (err) {
-        console.error(`Error occured during startup. \n\t${err}`);
+        console.error(`Error occurred during startup. \n\t${err}`);
         process.exit(1);
     }
 };

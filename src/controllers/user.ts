@@ -1,11 +1,11 @@
-import { BaseContext } from 'koa';
+import { ParameterizedContext } from 'koa';
 import { getManager, Repository } from 'typeorm';
 import { User } from '../models/user';
 
 
 export default class UserController {
 
-    public static async getUsers(ctx: BaseContext) {
+    public static async getUsers(ctx: ParameterizedContext) {
         const userRepository: Repository<User> = getManager().getRepository(User);
         const users: User[] = await userRepository.find();
 
@@ -13,7 +13,7 @@ export default class UserController {
         ctx.body = users;
     }
 
-    public static async getUser(ctx: BaseContext) {
+    public static async getUser(ctx: ParameterizedContext) {
         const userRepository: Repository<User> = getManager().getRepository(User);
 
         // TODO: Pass ID via parameter set

@@ -1,5 +1,9 @@
 # thingy-api-red
 
+## Setup
+
+Before starting the server, copy .env.example as .env and fill in the TODO fields 
+
 ## API
 
 ### Draft API definition
@@ -9,6 +13,8 @@
 
 `/users/` => Get all users  
 `/users/:name` => Get specific user
+
+`/coffee_events/` => Get all coffee events (when was a coffee produced)
 
 ## Persistence
 The two database systems can be started for local development via `docker-compose`. The ports are published, which makes it possible to access the databases. 

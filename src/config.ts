@@ -1,20 +1,34 @@
-export interface IConfig {
-    port: number;
-    prettyLog: boolean;
+import * as dotenv from 'dotenv';
+
+export function loadConfig() {
+    dotenv.config();
+    return {
+        port: process.env.NODE_PORT,
+        prettyLog: process.env.NODE_ENV == 'development',
+
+        flux: {
+            hostname: process.env.INFLUXDB_HOST,
+            port: process.env.INFLUXDB_PORT,
+            dbname: process.env.INFLUXDB_DBNAME,
+            user: process.env.INFLUXDB_ADMIN_USER,
+            password: process.env.INFLUXDB_ADMIN_PASSWORD,
+        },
+
+        postgres: {
+            hostname: process.env.POSTGRES_HOST,
+            port: parseInt(process.env.POSTGRES_PORT),
+            dbname: process.env.POSTGRES_DB,
+            user: process.env.POSTGRES_USER,
+            password: process.env.POSTGRES_PASSWORD,
+        },
+
+        mqtt: {
+            hostname: process.env.MQTT_HOST,
+            port: process.env.MQTT_PORT,
+            user: process.env.MQTT_USER,
+            password: process.env.MQTT_PW,
+            // TODO: later we should store a list of all available sensors and their topics in the db
+            accelerationSensorTopic: process.env.ACCELERATION_SENSOR_TOPIC
+        },
+    };
 }
-
-// TODO: move to JSON configuration
-const config = {
-    port: process.env.NODE_PORT || 3000,
-    prettyLog: process.env.NODE_ENV == 'development',
-    flux_hostname: process.env.FLUXDB_HOST || 'localhost',
-    flux_dbname: process.env.FLUXDB_DBNAME || 'thingy-db-red',
-    flux_user: process.env.FLUXDB_USER || 'fluxdb-user',
-    flux_pw: process.env.FLUXDB_PW || 'mysecretpassword',
-    pg_hostname: process.env.POSTGRES_HOST || 'localhost',
-    pg_dbname: process.env.POSTGRES_DBNAME || 'thingy-db-red',
-    pg_user: process.env.POSTGRES_USER || 'postgres',
-    pg_pw: process.env.POSTGRES_PW || 'mysecretpassword',
-};
-
-export { config };
