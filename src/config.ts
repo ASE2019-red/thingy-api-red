@@ -27,7 +27,10 @@ export function loadConfig() {
             port: process.env.MQTT_PORT,
             user: process.env.MQTT_USER,
             password: process.env.MQTT_PW,
-            accelerationTopic: process.env.ACCELERATION_TOPIC
+            macThingy1: process.env.MAC_THINGY1,
+            macThingy2: process.env.MAC_THINGY2,
+            macThingy3: process.env.MAC_THINGY3,
+            accelerationTopic: process.env.ACCELERATION_TOPIC,
         },
     };
 }

@@ -1,6 +1,6 @@
 import { BaseContext } from 'koa';
 import { getConnection } from 'typeorm';
-import { User } from '../src/models/user';
+import { User } from '../../src/models/user';
 
 export default class MockData {
 

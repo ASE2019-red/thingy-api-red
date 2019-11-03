@@ -1,21 +1,20 @@
 import * as Koa from 'koa';
-import { loadConfig } from './config';
-import { routes } from './routes';
-import { Connection } from 'typeorm';
-import MQTTTopicClient from './mqtt/mqtt';
-import CoffeeDetector from './mqtt/coffeDetector';
-import * as bodyParser from 'koa-bodyparser'
-import { InfluxDB } from 'influx';
-import { influxConn, pgConn } from './persistence/database';
-import { qaRoutes } from '../test/routes';
-
+import {Connection} from 'typeorm';
+import {qaRoutes} from '../test/web/routes';
+import {loadConfig} from './config';
+import MQTTTopicClient from './mqtt/client';
+import {influxConn, pgConn} from './persistence/database';
+import {routes} from './routes';
 
 async function bootstrap(samples: boolean) {
     try {
         const config = loadConfig();
+
         // Initialize the database
         const influx: InfluxDB = await influxConn(config.flux);
         const pg: Connection = await pgConn(config.postgres);
+
+        // Connect to MQTT broker
         const mqtt = new MQTTTopicClient();
         await mqtt.connect(config.mqtt);
 

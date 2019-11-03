@@ -59,7 +59,7 @@ class CoffeeDetector {
         )
     }
 
-    /** 
+    /**
      * @param accelerationSensorTopic: full string of the raw motion data topic
      *        for ONE specific thingy device
      * @param onCoffeeProduced function which should be called after the CoffeeDetector
