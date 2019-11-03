@@ -1,20 +1,20 @@
+import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
-import { loadConfig } from './config';
-import { routes } from './routes';
-import { qa_routes } from '../test/routes';
-import { pg_conn, influx_conn } from './persistence/database';
-import { InfluxDB } from 'influx';
-import { Connection, getManager, Repository } from 'typeorm';
-import MQTTTopicClient from './mqtt/mqtt';
+import {Connection, getManager, Repository} from 'typeorm';
+import {qaRoutes} from '../test/routes';
+import {loadConfig} from './config';
+import {CoffeeEvent} from './models/coffeeEvent';
 import CoffeeDetector from './mqtt/coffeDetector';
-import { CoffeeEvent } from './models/coffeeEvent';
+import MQTTTopicClient from './mqtt/mqtt';
+import {influxConn, pgConn} from './persistence/database';
+import {routes} from './routes';
 
 async function bootstrap(samples: boolean) {
     try {
         const config = loadConfig();
         // Initialize the database
-        const influx: InfluxDB = await influx_conn(config.flux);
-        const pg: Connection = await pg_conn(config.postgres);
+        const influx: InfluxDB = await influxConn(config.flux);
+        const pg: Connection = await pgConn(config.postgres);
         const mqtt = new MQTTTopicClient();
         await mqtt.connect(config.mqtt);
 
@@ -22,9 +22,10 @@ async function bootstrap(samples: boolean) {
             const coffeeEventRepo: Repository<CoffeeEvent> = getManager().getRepository(CoffeeEvent);
             const newEvent = new CoffeeEvent();
             coffeeEventRepo.save(newEvent);
-        }, mqtt)
+        }, mqtt);
 
         // Initialize the Koa application
+        // tslint:disable-next-line:no-shadowed-variable
         const app: Koa = new Koa();
 
         // Logger
@@ -43,8 +44,9 @@ async function bootstrap(samples: boolean) {
         });
 
         // Only registry testdata routes if flag is set
-        if (samples)
-            app.use(qa_routes);
+        if (samples) {
+            app.use(qaRoutes);
+        }
 
         // Bind DB connections to context
         app.context.influx = influx;
@@ -62,6 +64,6 @@ async function bootstrap(samples: boolean) {
         console.error(`Error occurred during startup. \n\t${err}`);
         process.exit(1);
     }
-};
+}
 
 export const app = bootstrap(true);

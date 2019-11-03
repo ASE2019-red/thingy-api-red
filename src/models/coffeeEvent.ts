@@ -1,20 +1,19 @@
 import {
+    CreateDateColumn,
     Entity,
     PrimaryGeneratedColumn,
-    CreateDateColumn,
     UpdateDateColumn,
 } from 'typeorm';
-
 
 @Entity('coffee_events')
 export class CoffeeEvent {
 
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    public id: string;
 
     @CreateDateColumn()
-    createdAt: Date;
+    public createdAt: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date;
+    public updatedAt: Date;
 }
