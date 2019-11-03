@@ -1,10 +1,13 @@
+import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
+import * as bodyParser from 'koa-bodyparser';
 import {Connection} from 'typeorm';
 import {qaRoutes} from '../test/web/routes';
 import {loadConfig} from './config';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
+import CoffeeDetector from './service/coffeeDetector';
 import DataRecorder from './service/dataRecorder';
 
 async function bootstrap(samples: boolean) {
@@ -19,7 +22,7 @@ async function bootstrap(samples: boolean) {
         const mqtt = new MQTTTopicClient();
         await mqtt.connect(config.mqtt);
 
-        CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
+        await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
 
         const dataRecorder: DataRecorder = new DataRecorder(config.mqtt, mqtt, influx);
         // dataRecorder.start(DataRecorder.topicDefinitions.thingy1.gravity);

@@ -1,6 +1,6 @@
-import { BaseContext } from 'koa';
-import { getConnection } from 'typeorm';
-import { User } from '../../src/models/user';
+import {BaseContext} from 'koa';
+import {getConnection} from 'typeorm';
+import {User} from '../../src/models/user';
 
 export default class MockData {
 
@@ -13,10 +13,10 @@ export default class MockData {
             await getConnection().createQueryBuilder()
                 .insert().into(User)
                 .values([
-                    { name: 'Pascal', email: 'pascal.zingg@students.unibe.ch', hashedPassword: 'pass123' },
-                    { name: 'Simon', email: 'simon.curty@students.unibe.ch', hashedPassword: 'pass123' },
-                    { name: 'Guillaume', email: 'guillaume.corsini@students.unibe.ch', hashedPassword: 'pass123' },
-                    { name: 'Patrick', email: 'patrick.frischknecht@students.unibe.ch', hashedPassword: 'pass123' },
+                    {name: 'Pascal', email: 'pascal.zingg@students.unibe.ch', hashedPassword: 'pass123'},
+                    {name: 'Simon', email: 'simon.curty@students.unibe.ch', hashedPassword: 'pass123'},
+                    {name: 'Guillaume', email: 'guillaume.corsini@students.unibe.ch', hashedPassword: 'pass123'},
+                    {name: 'Patrick', email: 'patrick.frischknecht@students.unibe.ch', hashedPassword: 'pass123'},
                 ])
                 .execute();
 

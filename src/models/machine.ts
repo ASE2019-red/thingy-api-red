@@ -1,12 +1,12 @@
+import { Length } from 'class-validator';
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
-    UpdateDateColumn,
+    Entity,
     OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
 } from 'typeorm';
-import { Length, IsEmail } from 'class-validator';
 import { Coffee } from './coffee';
 
 @Entity()
@@ -14,7 +14,6 @@ export class Machine {
 
     @PrimaryGeneratedColumn('uuid')
     public id: string;
-
 
     @Column('text')
     public name: string;
@@ -34,6 +33,6 @@ export class Machine {
     @UpdateDateColumn()
     public updatedAt: Date;
 
-    @OneToMany(type => Coffee, coffee => coffee.machine)
+    @OneToMany((type) => Coffee, (coffee) => coffee.machine)
     public coffees: Coffee;
 }

@@ -1,8 +1,8 @@
 import * as Influx from 'influx';
-import { createConnection, Connection } from 'typeorm';
-import { User } from '../models/user';
+import { Connection, createConnection } from 'typeorm';
 import { Coffee } from '../models/coffee';
 import { Machine } from '../models/machine';
+import { User } from '../models/user';
 
 export const influxConn = async (config: {hostname: string, dbname: string }) => {
     const conn: Influx.InfluxDB = new Influx.InfluxDB({

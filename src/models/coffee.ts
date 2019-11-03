@@ -1,12 +1,11 @@
 import {
     CreateDateColumn,
     Entity,
+    ManyToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
-    ManyToOne,
 } from 'typeorm';
 import { Machine } from './machine';
-
 
 @Entity()
 export class Coffee {
@@ -20,6 +19,6 @@ export class Coffee {
     @UpdateDateColumn()
     public updatedAt: Date;
 
-    @ManyToOne(type => Machine, machine => machine.coffees)
+    @ManyToOne((type) => Machine, (machine) => machine.coffees)
     public machine: Machine;
 }

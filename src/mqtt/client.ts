@@ -34,8 +34,13 @@ export class MQTTTopicClient {
     }
 
     public onTopicMessage(topic: string, callback: (message: Buffer) => void) {
-        this.topicMessageCallbacks.set(topic, callback);
-        this.client.subscribe(topic);
+        this.client.subscribe(topic).then((r) => {
+            this.topicMessageCallbacks.set(topic, callback);
+        });
+    }
+
+    public async publish(topic: string, message: string | Buffer) {
+        await this.client.publish(topic, message);
     }
 }
 

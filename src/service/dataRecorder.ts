@@ -33,13 +33,15 @@ class DataRecorder {
         };
     }
 
-    public start(topic: string, measurement: string, tags: any = {}, fields: any = {}) {
+    public start(topic: string, measurement: string, tags: any = {}, callback: (message: Buffer) => any) {
 
-        this.mqttClient.onTopicMessage(topic, async () => {
+        this.mqttClient.onTopicMessage(topic, async (message: Buffer) => {
             try {
+                const fields = callback(message);
                 await this.influxClient.writePoints([{measurement, tags, fields}]);
             } catch (e) {
                 console.error('Cannot write to InfluxDB');
+                console.error(e);
             }
         });
     }
