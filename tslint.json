@@ -24,7 +24,9 @@
     "triple-equals": [
       false
     ],
-    "arrow-parens": false
+    "arrow-parens": false,
+    "radix": false,
+    "no-unused-expression": false
   },
   "rulesDirectory": []
 }
