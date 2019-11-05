@@ -1,7 +1,8 @@
 import * as Influx from 'influx';
 import { createConnection, Connection } from 'typeorm';
 import { User } from '../models/user';
-import { CoffeeEvent } from '../models/coffeeEvent';
+import { Coffee } from '../models/coffee';
+import { Machine } from '../models/machine';
 
 export const influx_conn = async (config: {hostname: string, dbname: string }) => {
     const c_influx: Influx.InfluxDB = new Influx.InfluxDB({
@@ -29,7 +30,7 @@ export const pg_conn = async (config: {hostname: string, port: number, user: str
         username: config.user,
         database: config.dbname,
         password: config.password,
-        entities: [User, CoffeeEvent],
+        entities: [User, Coffee, Machine],
         logging: ['error'],
         synchronize: true,
     });

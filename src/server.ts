@@ -4,10 +4,11 @@ import { routes } from './routes';
 import { qa_routes } from '../test/routes';
 import { pg_conn, influx_conn } from './persistence/database';
 import { InfluxDB } from 'influx';
-import { Connection, getManager, Repository } from 'typeorm';
+import { Connection } from 'typeorm';
 import MQTTTopicClient from './mqtt/mqtt';
 import CoffeeDetector from './mqtt/coffeDetector';
-import { CoffeeEvent } from './models/coffeeEvent';
+import * as bodyParser from 'koa-bodyparser'
+
 
 async function bootstrap(samples: boolean) {
     try {
@@ -18,11 +19,7 @@ async function bootstrap(samples: boolean) {
         const mqtt = new MQTTTopicClient();
         await mqtt.connect(config.mqtt);
 
-        new CoffeeDetector(config.mqtt.accelerationSensorTopic, () => {
-            const coffeeEventRepo: Repository<CoffeeEvent> = getManager().getRepository(CoffeeEvent);
-            const newEvent = new CoffeeEvent();
-            coffeeEventRepo.save(newEvent);
-        }, mqtt)
+        CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
 
         // Initialize the Koa application
         const app: Koa = new Koa();
@@ -49,8 +46,10 @@ async function bootstrap(samples: boolean) {
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
+        app.context.mqtt = mqtt;
 
         // Startup app
+        app.use(bodyParser());
         app.use(routes);
         app.listen(config.port);
 

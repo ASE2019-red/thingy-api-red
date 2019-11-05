@@ -1,14 +1,20 @@
 import * as Router from 'koa-router';
 import userController from './controllers/user';
-import measurementController from './controllers/measurement';
-import CoffeeEventController from './controllers/coffeeEvent';
+import CoffeeController from './controllers/coffee';
+import MachineController from './controllers/machine';
 
 const router = new Router();
 
 
-router.get('/measurements/:name', measurementController.getByName);
-//router.get('/users', userController.getUsers);
-router.get('/coffee_events', CoffeeEventController.getCoffeeEvents);
+router.get('/coffee', CoffeeController.getCoffees);
+router.get('/coffee/:id', CoffeeController.getCoffee);
+
+router.get('/machine/:id/coffee', MachineController.getMachineCoffees);
+router.get('/machine', MachineController.getMachines);
+router.get('/machine/:id', MachineController.getMachine);
+router.post('/machine', MachineController.createMachine);
+
+
 router.get('/users/:id', userController.getUser);
 
 export const routes = router.routes();
