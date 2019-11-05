@@ -1,5 +1,4 @@
-import { ParameterizedContext } from 'koa';
-
+import {ParameterizedContext} from 'koa';
 
 export default class MeasurementController {
 
@@ -7,7 +6,7 @@ export default class MeasurementController {
         const name = ctx.params.name;
 
         try {
-            const results = await ctx.influx.query(`SELECT * FROM ${name}`)
+            const results = await ctx.influx.query(`SELECT * FROM ${name}`);
             ctx.status = 200;
             ctx.body = results;
 

@@ -5,5 +5,4 @@ const router = new Router();
 
 router.get('/qa/users/bootstrap', TestData.createTestUsers);
 
-
-export const qa_routes = router.routes();
+export const qaRoutes = router.routes();

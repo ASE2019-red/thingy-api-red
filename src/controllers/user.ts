@@ -2,7 +2,6 @@ import { ParameterizedContext } from 'koa';
 import { getManager, Repository } from 'typeorm';
 import { User } from '../models/user';
 
-
 export default class UserController {
 
     public static async getUsers(ctx: ParameterizedContext) {

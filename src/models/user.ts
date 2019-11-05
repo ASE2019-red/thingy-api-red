@@ -1,33 +1,32 @@
+import { IsEmail, Length } from 'class-validator';
 import {
-    Entity,
-    PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
+    Entity,
+    PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
-import { Length, IsEmail } from 'class-validator';
-
 
 @Entity('users')
 export class User {
 
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    public id: string;
 
     @Column('text')
-    name: string;
+    public name: string;
 
     @Column('text')
     @Length(5, 100)
     @IsEmail()
-    email: string;
+    public email: string;
 
     @Column('text')
-    hashedPassword: string;
+    public hashedPassword: string;
 
     @CreateDateColumn()
-    createdAt: Date;
+    public createdAt: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date;
+    public updatedAt: Date;
 }

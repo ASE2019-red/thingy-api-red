@@ -1,7 +1,7 @@
 import {
+    CreateDateColumn,
     Entity,
     PrimaryGeneratedColumn,
-    CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
 } from 'typeorm';
@@ -12,14 +12,14 @@ import { Machine } from './machine';
 export class Coffee {
 
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    public id: string;
 
     @CreateDateColumn()
-    createdAt: Date;
+    public createdAt: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date;
+    public updatedAt: Date;
 
     @ManyToOne(type => Machine, machine => machine.coffees)
-    machine: Machine;
+    public machine: Machine;
 }

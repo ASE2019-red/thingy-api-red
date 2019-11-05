@@ -8,12 +8,12 @@ import { Coffee } from "../models/coffee";
 // sensor and the coffee machine (maybe within some setup process for a new machine?)
 
 // Observed acceleration when there is no motion (only gravity)
-const NO_ADDITIONAL_ACCELERATION = new Vector(0, 0, 1000)
+const NO_ADDITIONAL_ACCELERATION = new Vector(0, 0, 1000);
 
 // number of sensor ticks over which we average the acceleration
 const AVERAGE_WINDOW = 25;
 // acceleration speed above which we consider a coffee is being produced
-// if it is hold up for longer than 
+// if it is hold up for longer than
 // COFFE_PRODUCED_MINIMAL_DURATION_THRESHOLD * AVERAGE_WINDOW sensor ticks
 const COFFE_PRODUCED_ACCELERATION_THRESHOLD = 38;
 // minimum number of average windows over which the acceleration must be higher
@@ -41,9 +41,9 @@ class CoffeeDetector {
             })
         })
     }
-    
+
     static createForMachine(machine: Machine,
-                            mqttClient: MQTTTopicClient) {
+        mqttClient: MQTTTopicClient) {
 
         const onCoffeeProduced = () => {
             const coffeeRepo: Repository<Coffee> = getManager().getRepository(Coffee);
@@ -67,45 +67,45 @@ class CoffeeDetector {
      * @param mqttClient
      */
     constructor(accelerationSensorTopic: string,
-        onCoffeeProduced: () => void,
-        mqttClient: MQTTTopicClient) {
+                onCoffeeProduced: () => void,
+                mqttClient: MQTTTopicClient) {
         this.onCoffeeProduced = onCoffeeProduced;
         this.mqttClient = mqttClient;
         this.mqttClient.onTopicMessage(accelerationSensorTopic, this.receiveMotionData);
     }
 
-    receiveMotionData = (rawData: Buffer) => {
+    public receiveMotionData = (rawData: Buffer) => {
         // todo: find out how we can get numbers from mqtt, instead of a string...
         const numbers = rawData.toString().trim().split(',');
         const accelerationX = parseInt(numbers[0]);
         const accelerationY = parseInt(numbers[1]);
         const accelerationZ = parseInt(numbers[2]);
-        const accelerationVector = new Vector(accelerationX, accelerationY, accelerationZ)
+        const accelerationVector = new Vector(accelerationX, accelerationY, accelerationZ);
         const effectiveAccelerationVector = accelerationVector.minus(NO_ADDITIONAL_ACCELERATION);
-        const effectiveAcceleration = effectiveAccelerationVector.norm()
+        const effectiveAcceleration = effectiveAccelerationVector.norm();
         this.averageWindow.push(effectiveAcceleration);
         if (this.averageWindow.length >= AVERAGE_WINDOW) {
             const averageWindowAcceleration = this.currentAverage();
             this.detectIsProducingCoffee(averageWindowAcceleration);
-            this.averageWindow = []
-            console.log("window")
+            this.averageWindow = [];
         }
+
     }
 
-    currentAverage() {
+    private currentAverage() {
         return this.averageWindow.reduce((sum, current) => sum + current) / this.averageWindow.length;
     }
 
-    stoppedProducingCoffee() {
+    private stoppedProducingCoffee() {
         return this.windowsBelowThresholdAfterStart >= COFFE_PRODUCED_STOP_THRESHOLD;
     }
 
-    detectIsProducingCoffee(averageWindowAcceleration: number) {
+    private detectIsProducingCoffee(averageWindowAcceleration: number) {
         if (averageWindowAcceleration < COFFE_PRODUCED_ACCELERATION_THRESHOLD) {
             // acceleration goes below threshold, after a long window over the threshold
             if (this.coffeInProduction) {
                 this.windowsBelowThresholdAfterStart += 1;
-                // below threshold for a longer time 
+                // below threshold for a longer time
                 // => coffee production is finished
                 if (this.stoppedProducingCoffee) {
                     this.onCoffeeProduced();
@@ -122,7 +122,6 @@ class CoffeeDetector {
                 this.coffeInProduction = true;
             }
         }
-
 
     }
 }
