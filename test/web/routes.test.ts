@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import * as supertest from 'supertest';
 import {app} from '../../src/server';
 
@@ -5,7 +6,7 @@ describe('Koa route testing', () => {
     let st: any;
 
     beforeAll(async () => {
-        st = supertest((await app).callback());
+        st = supertest((await app).listen());
     });
 
     // FIXME: Tear down server properly (using --forceExit flag for jest tests by now)
@@ -38,5 +39,21 @@ describe('Koa route testing', () => {
 
         const body: any[] = response.body;
         expect(body.map((v) => v.name).includes('test_m')).toBeTruthy();
+    });
+
+    test('GET /measurements/test_m/range', async () => {
+        await st.get('/qa/measurements/bootstrap');
+
+        const response = await st.get('/measurements/test_m/range').query({
+            from: moment().subtract(10, 'minute').format(),
+            to: moment().format(),
+
+        });
+
+        expect(response.status).toEqual(200);
+        expect(response.type).toEqual('application/json');
+
+        // const body: any[] = response.body;
+        // expect(body.map((v) => v.name).includes('test_m')).toBeTruthy();
     });
 });

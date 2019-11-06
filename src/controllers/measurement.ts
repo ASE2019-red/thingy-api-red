@@ -28,4 +28,20 @@ export default class MeasurementController {
             ctx.body = `The measurement ${name} cannot be found`;
         }
     }
+
+    public static async getByIdRange(ctx: ParameterizedContext) {
+        const id = ctx.params.id;
+        const from = ctx.query.from;
+        const to = ctx.query.to;
+
+        try {
+            const results = await ctx.influx.query(`SELECT * FROM ${id} WHERE time >='${from}' AND time <='${to}'`);
+            ctx.status = 200;
+            ctx.body = results;
+
+        } catch (err) {
+            ctx.status = 400;
+            ctx.body = `The measurement ${name} cannot be found`;
+        }
+    }
 }

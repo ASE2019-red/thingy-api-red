@@ -1,6 +1,7 @@
 CREATE DATABASE "thingy-db-red"
 USE "thingy-db-red"
 SHOW DATABASES
+CREATE RETENTION POLICY "one_month" ON "thingy-db-red" DURATION 4w REPLICATION 1 DEFAULT
 INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651417437470260
 INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651357442053513
 INSERT gravity,location=ff-office x=10.12,y=20,z=20 1571651297446732134

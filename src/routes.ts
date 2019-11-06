@@ -27,5 +27,6 @@ router.get('/users/:id', userController.getUser);
 // Measurement endpoint
 router.get('/measurements', MeasurementController.getAll);
 router.get('/measurements/:id', MeasurementController.getById);
+router.get('/measurements/:id/range', MeasurementController.getByIdRange);
 
 export const routes = router.routes();
