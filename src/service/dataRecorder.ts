@@ -45,6 +45,10 @@ class DataRecorder {
             }
         });
     }
+
+    public stop(topic: string, measurement: string) {
+        // TODO
+    }
 }
 
 export default DataRecorder;

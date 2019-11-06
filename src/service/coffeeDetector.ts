@@ -1,6 +1,6 @@
-import { getManager, Repository } from 'typeorm';
-import { Coffee } from '../models/coffee';
-import { Machine } from '../models/machine';
+import {getManager, Repository} from 'typeorm';
+import {Coffee} from '../models/coffee';
+import {Machine} from '../models/machine';
 import MQTTTopicClient from '../mqtt/client';
 import Vector from './vector';
 
@@ -27,8 +27,8 @@ class CoffeeDetector {
 
     public static async createForAllMachines(accelerationTopic: string, mqttClient: MQTTTopicClient) {
         CoffeeDetector.accelerationTopic = accelerationTopic;
-        getManager().getRepository(Machine).find().then((machines) => {
-            machines.forEach((machine) => {
+        getManager().getRepository(Machine).find().then((machines: Machine[]) => {
+            machines.forEach((machine: Machine) => {
                 CoffeeDetector.createForMachine(machine, mqttClient);
             });
         });
@@ -50,6 +50,7 @@ class CoffeeDetector {
             mqttClient,
         );
     }
+
     private static accelerationTopic: string;
     private mqttClient: MQTTTopicClient;
     private averageWindow: number[] = [];
