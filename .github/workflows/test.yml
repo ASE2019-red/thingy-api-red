@@ -1,0 +1,29 @@
+name: "Test thingy-api-red"
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Prepare env variables
+        run: cp .env.example .env
+
+      - name: Startup Docker containers
+        run: docker-compose up -d influx postgres
+
+      - run: npm ci
+
+      - run: npm run build-server
+
+      - run: npm run test
+        env:
+          MQTT_USER: ${{ secrets.MQTT_USER }}
+          MQTT_PW: ${{ secrets.MQTT_PW }}
