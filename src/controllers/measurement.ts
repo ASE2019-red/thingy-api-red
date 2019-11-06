@@ -1,9 +1,9 @@
-import { BaseContext } from 'koa';
+import { ParameterizedContext } from 'koa';
 
 
 export default class MeasurementController {
 
-    public static async getByName(ctx: BaseContext) {
+    public static async getByName(ctx: ParameterizedContext) {
         const name = ctx.params.name;
 
         try {

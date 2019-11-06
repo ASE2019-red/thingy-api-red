@@ -2,16 +2,18 @@ import * as Koa from 'koa';
 import { config } from './config';
 import { routes } from './routes';
 import { qa_routes } from '../test/routes';
-import { pg_conn, influx_conn } from './database/database';
+import { pg_conn, influx_conn } from './persistence/database';
+import { InfluxDB } from 'influx';
+import { Connection } from 'typeorm';
 
 async function bootstrap(samples: boolean) {
     try {
         // Initialize the database
-        let influx = await influx_conn();
-        let pg = await pg_conn();
+        let influx: InfluxDB = await influx_conn();
+        let pg: Connection = await pg_conn();
 
         // Initialize the Koa application
-        const app = new Koa();
+        const app: Koa = new Koa();
 
         // Logger
         app.use(async (ctx, next) => {
@@ -35,6 +37,7 @@ async function bootstrap(samples: boolean) {
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
+        //app.context.mqtt = mqtt;
 
         // Startup app
         app.use(routes);

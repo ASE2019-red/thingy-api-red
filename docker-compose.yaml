@@ -47,6 +47,10 @@ services:
       - postgres
     environment:
       NODE_PORT: 8000
-      NODE_ENV: "development"
+      NODE_ENV: development
       FLUXDB_HOST: influx
       POSTGRES_HOST: postgres
+      MQTT_HOST: thing.mqtt.zone
+      MQTT_PORT: 1893
+      MQTT_USER: red
+      MQTT_PW: 061526c657
