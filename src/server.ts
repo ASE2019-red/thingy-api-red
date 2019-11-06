@@ -1,18 +1,34 @@
+import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
-import { config } from './config';
-import { routes } from './routes';
-import { qa_routes } from '../test/routes';
-import { pg_conn, influx_conn } from './persistence/database';
-import { InfluxDB } from 'influx';
-import { Connection } from 'typeorm';
+import * as bodyParser from 'koa-bodyparser';
+import {Connection} from 'typeorm';
+import {qaRoutes} from '../test/web/routes';
+import {loadConfig} from './config';
+import MQTTTopicClient from './mqtt/client';
+import {influxConn, pgConn} from './persistence/database';
+import {routes} from './routes';
+import CoffeeDetector from './service/coffeeDetector';
+import DataRecorder from './service/dataRecorder';
 
 async function bootstrap(samples: boolean) {
     try {
+        const config = loadConfig();
+
         // Initialize the database
-        let influx: InfluxDB = await influx_conn();
-        let pg: Connection = await pg_conn();
+        const influx: InfluxDB = await influxConn(config.flux);
+        const pg: Connection = await pgConn(config.postgres);
+
+        // Connect to MQTT broker
+        const mqtt = new MQTTTopicClient();
+        await mqtt.connect(config.mqtt);
+
+        await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
+
+        const dataRecorder: DataRecorder = new DataRecorder(config.mqtt, mqtt, influx);
+        // dataRecorder.start(DataRecorder.topicDefinitions.thingy1.gravity);
 
         // Initialize the Koa application
+        // tslint:disable-next-line:no-shadowed-variable
         const app: Koa = new Koa();
 
         // Logger
@@ -31,15 +47,17 @@ async function bootstrap(samples: boolean) {
         });
 
         // Only registry testdata routes if flag is set
-        if (samples)
-            app.use(qa_routes);
+        if (samples) {
+            app.use(qaRoutes);
+        }
 
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
-        //app.context.mqtt = mqtt;
+        app.context.mqtt = mqtt;
 
         // Startup app
+        app.use(bodyParser());
         app.use(routes);
         app.listen(config.port);
 
@@ -48,9 +66,9 @@ async function bootstrap(samples: boolean) {
         return app;
 
     } catch (err) {
-        console.error(`Error occured during startup. \n\t${err}`);
+        console.error(`Error occurred during startup. \n\t${err}`);
         process.exit(1);
     }
-};
+}
 
 export const app = bootstrap(true);

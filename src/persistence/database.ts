@@ -1,37 +1,40 @@
 import * as Influx from 'influx';
-import { createConnection, Connection } from 'typeorm';
-import { config } from '../config';
+import { Connection, createConnection } from 'typeorm';
+import { Coffee } from '../models/coffee';
+import { Machine } from '../models/machine';
 import { User } from '../models/user';
 
-export const influx_conn = async () => {
-    const c_influx: Influx.InfluxDB = new Influx.InfluxDB({
-        host: config.flux.hostname,
-        database: config.flux.dbname,
+export const influxConn = async (config: {hostname: string, dbname: string }) => {
+    const conn: Influx.InfluxDB = new Influx.InfluxDB({
+        host: config.hostname,
+        database: config.dbname,
     });
 
-    await c_influx.getDatabaseNames().then(names => {
-        if (names.includes(config.flux.dbname)) {
-            console.log(`Successfully connected to InfluxDB`)
+    await conn.getDatabaseNames().then((names) => {
+        if (names.includes(config.dbname)) {
+            console.log(`Successfully connected to InfluxDB`);
         } else {
-            throw Error(`Cannot find database ${config.flux.dbname}`);
+            throw Error(`Cannot find database ${config.dbname}`);
         }
     });
 
-    return c_influx;
+    return conn;
 };
 
-export const pg_conn = async () => {
-    const c_pg: Connection = await createConnection({
+export const pgConn = async (config: {hostname: string, port: number, user: string, dbname: string
+                                       password: string}) => {
+    const conn: Connection = await createConnection({
         type: 'postgres',
-        host: config.postgres.hostname,
-        username: config.postgres.user,
-        database: config.postgres.dbname,
-        password: config.postgres.password,
-        entities: [User,],
+        host: config.hostname,
+        port: config.port,
+        username: config.user,
+        database: config.dbname,
+        password: config.password,
+        entities: [User, Coffee, Machine],
         logging: ['error'],
         synchronize: true,
     });
 
-    console.log(`Successfully connected to PostgreSQL`)
-    return c_pg;
+    console.log(`Successfully connected to PostgreSQL`);
+    return conn;
 };

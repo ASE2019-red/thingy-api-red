@@ -14,11 +14,13 @@
   "devDependencies": {
     "@types/jest": "24.0.18",
     "@types/koa": "^2.0.50",
+    "@types/koa-bodyparser": "4.3.0",
     "@types/koa-router": "^7.0.42",
     "@types/pg": "7.11.2",
     "@types/supertest": "2.0.8",
     "async-mqtt": "2.4.2",
     "class-validator": "0.10.2",
+    "dotenv": "8.2.0",
     "influx": "5.4.2",
     "jest": "24.9.0",
     "nodemon": "^1.19.3",
@@ -33,6 +35,7 @@
   "dependencies": {
     "jerzy": "0.2.1",
     "koa": "^2.9.0",
+    "koa-bodyparser": "4.2.1",
     "koa-router": "^7.4.0"
   }
 }
