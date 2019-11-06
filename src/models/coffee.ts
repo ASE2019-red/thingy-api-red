@@ -3,10 +3,13 @@ import {
     Entity,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
+    ManyToOne,
 } from 'typeorm';
+import { Machine } from './machine';
 
-@Entity('coffee_events')
-export class CoffeeEvent {
+
+@Entity()
+export class Coffee {
 
     @PrimaryGeneratedColumn('uuid')
     public id: string;
@@ -16,4 +19,7 @@ export class CoffeeEvent {
 
     @UpdateDateColumn()
     public updatedAt: Date;
+
+    @ManyToOne(type => Machine, machine => machine.coffees)
+    public machine: Machine;
 }

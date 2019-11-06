@@ -27,8 +27,7 @@ export function loadConfig() {
             port: process.env.MQTT_PORT,
             user: process.env.MQTT_USER,
             password: process.env.MQTT_PW,
-            // TODO: later we should store a list of all available sensors and their topics in the db
-            accelerationSensorTopic: process.env.ACCELERATION_SENSOR_TOPIC,
+            accelerationTopic: process.env.ACCELERATION_TOPIC
         },
     };
 }

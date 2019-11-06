@@ -1,13 +1,14 @@
-import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
-import {Connection, getManager, Repository} from 'typeorm';
-import {qaRoutes} from '../test/routes';
-import {loadConfig} from './config';
-import {CoffeeEvent} from './models/coffeeEvent';
-import CoffeeDetector from './mqtt/coffeDetector';
+import { loadConfig } from './config';
+import { routes } from './routes';
+import { Connection } from 'typeorm';
 import MQTTTopicClient from './mqtt/mqtt';
-import {influxConn, pgConn} from './persistence/database';
-import {routes} from './routes';
+import CoffeeDetector from './mqtt/coffeDetector';
+import * as bodyParser from 'koa-bodyparser'
+import { InfluxDB } from 'influx';
+import { influxConn, pgConn } from './persistence/database';
+import { qaRoutes } from '../test/routes';
+
 
 async function bootstrap(samples: boolean) {
     try {
@@ -18,11 +19,7 @@ async function bootstrap(samples: boolean) {
         const mqtt = new MQTTTopicClient();
         await mqtt.connect(config.mqtt);
 
-        new CoffeeDetector(config.mqtt.accelerationSensorTopic, () => {
-            const coffeeEventRepo: Repository<CoffeeEvent> = getManager().getRepository(CoffeeEvent);
-            const newEvent = new CoffeeEvent();
-            coffeeEventRepo.save(newEvent);
-        }, mqtt);
+        CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
 
         // Initialize the Koa application
         // tslint:disable-next-line:no-shadowed-variable
@@ -51,8 +48,10 @@ async function bootstrap(samples: boolean) {
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
+        app.context.mqtt = mqtt;
 
         // Startup app
+        app.use(bodyParser());
         app.use(routes);
         app.listen(config.port);
 

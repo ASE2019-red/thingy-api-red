@@ -1,5 +1,8 @@
-import MQTTTopicClient from './mqtt';
-import Vector from './vector';
+import MQTTTopicClient from "./mqtt";
+import Vector from "./vector";
+import { Machine } from "../models/machine";
+import { Repository, getManager } from "typeorm";
+import { Coffee } from "../models/coffee";
 
 // Constants: We should probably fine tune them based on the
 // sensor and the coffee machine (maybe within some setup process for a new machine?)
@@ -18,11 +21,11 @@ const COFFE_PRODUCED_ACCELERATION_THRESHOLD = 38;
 const COFFE_PRODUCED_MINIMAL_DURATION_THRESHOLD = 4;
 // minimum number of average windows over which the acceleration must be lower
 // than COFFE_PRODUCED_ACCELERATION_THRESHOLD such that we assumed the coffee is finished
-const COFFE_PRODUCED_STOP_THRESHOLD = 3;
+const COFFE_PRODUCED_STOP_THRESHOLD = 4;
 
 class CoffeeDetector {
     private mqttClient: MQTTTopicClient;
-    private accelerationSensorTopic: string;
+    private static accelerationTopic: string;
     private averageWindow: number[] = [];
     private consecutiveWindowsAboveThreshold: number = 0;
     private coffeInProduction: boolean = false;
@@ -30,7 +33,33 @@ class CoffeeDetector {
     private windowsBelowThresholdAfterStart: number = 0;
     private onCoffeeProduced: () => void;
 
-    /**
+    static async createForAllMachines(accelerationTopic: string, mqttClient: MQTTTopicClient) {
+        CoffeeDetector.accelerationTopic = accelerationTopic;
+        getManager().getRepository(Machine).find().then(machines => {
+            machines.forEach(machine => {
+                CoffeeDetector.createForMachine(machine, mqttClient)
+            })
+        })
+    }
+
+    static createForMachine(machine: Machine,
+        mqttClient: MQTTTopicClient) {
+
+        const onCoffeeProduced = () => {
+            const coffeeRepo: Repository<Coffee> = getManager().getRepository(Coffee);
+            const newCoffee = new Coffee();
+            newCoffee.machine = machine;
+            coffeeRepo.save(newCoffee);
+        }
+
+        new CoffeeDetector(
+            `${machine.sensorIdentifier}/${CoffeeDetector.accelerationTopic}`,
+            onCoffeeProduced,
+            mqttClient
+        )
+    }
+
+    /** 
      * @param accelerationSensorTopic: full string of the raw motion data topic
      *        for ONE specific thingy device
      * @param onCoffeeProduced function which should be called after the CoffeeDetector
@@ -41,7 +70,6 @@ class CoffeeDetector {
                 onCoffeeProduced: () => void,
                 mqttClient: MQTTTopicClient) {
         this.onCoffeeProduced = onCoffeeProduced;
-        this.accelerationSensorTopic = accelerationSensorTopic;
         this.mqttClient = mqttClient;
         this.mqttClient.onTopicMessage(accelerationSensorTopic, this.receiveMotionData);
     }
@@ -64,15 +92,15 @@ class CoffeeDetector {
 
     }
 
-    public currentAverage() {
+    private currentAverage() {
         return this.averageWindow.reduce((sum, current) => sum + current) / this.averageWindow.length;
     }
 
-    public stoppedProducingCoffee() {
+    private stoppedProducingCoffee() {
         return this.windowsBelowThresholdAfterStart >= COFFE_PRODUCED_STOP_THRESHOLD;
     }
 
-    public detectIsProducingCoffee(averageWindowAcceleration: number) {
+    private detectIsProducingCoffee(averageWindowAcceleration: number) {
         if (averageWindowAcceleration < COFFE_PRODUCED_ACCELERATION_THRESHOLD) {
             // acceleration goes below threshold, after a long window over the threshold
             if (this.coffeInProduction) {
