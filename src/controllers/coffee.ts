@@ -1,23 +1,22 @@
-import { ParameterizedContext } from 'koa';
-import { getManager, Repository } from 'typeorm';
-import { Coffee } from '../models/coffee';
-
+import {ParameterizedContext} from 'koa';
+import {getManager} from 'typeorm';
+import {Coffee} from '../models/coffee';
 
 export default class CoffeeController {
 
     private static get repository() {
-        return getManager().getRepository(Coffee)
+        return getManager().getRepository(Coffee);
     }
 
     public static async getCoffees(ctx: ParameterizedContext) {
-        const coffees: Coffee[] = await CoffeeController.repository.find({ relations: ["machine"] });
+        const coffees: Coffee[] = await CoffeeController.repository.find({relations: ['machine']});
 
         ctx.status = 200;
         ctx.body = coffees;
     }
 
     public static async getCoffee(ctx: ParameterizedContext) {
-        const coffee = await CoffeeController.repository.findOne(ctx.params.id, { relations: ["machine"] });
+        const coffee = await CoffeeController.repository.findOne(ctx.params.id, {relations: ['machine']});
 
         if (coffee) {
             ctx.status = 200;

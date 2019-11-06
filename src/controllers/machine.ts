@@ -1,13 +1,12 @@
-import { ParameterizedContext } from 'koa';
-import { getManager, Repository } from 'typeorm';
-import { Machine } from '../models/machine';
-import CoffeeDetector from '../mqtt/coffeDetector';
-
+import {ParameterizedContext} from 'koa';
+import {getManager} from 'typeorm';
+import {Machine} from '../models/machine';
+import CoffeeDetector from '../service/coffeeDetector';
 
 export default class MachineController {
 
     private static get repository() {
-        return getManager().getRepository(Machine)
+        return getManager().getRepository(Machine);
     }
 
     public static async getMachines(ctx: ParameterizedContext) {
@@ -18,15 +17,15 @@ export default class MachineController {
     }
 
     public static async createMachine(ctx: ParameterizedContext) {
-        const newMachine = new Machine()
-        let body = ctx.request.body;
+        const newMachine = new Machine();
+        const body = ctx.request.body;
         console.log(body);
         newMachine.name = body.name;
         newMachine.sensorIdentifier = body.sensorIdentifier;
         newMachine.active = true;
         try {
             const savedMachine = await MachineController.repository.save(newMachine);
-            CoffeeDetector.createForMachine(savedMachine, ctx.mqtt)
+            CoffeeDetector.createForMachine(savedMachine, ctx.mqtt);
 
             ctx.status = 200;
             ctx.body = savedMachine;
@@ -50,7 +49,7 @@ export default class MachineController {
     }
 
     public static async getMachineCoffees(ctx: ParameterizedContext) {
-        const machine = await MachineController.repository.findOne(ctx.params.id, { relations: ["coffees"] });
+        const machine = await MachineController.repository.findOne(ctx.params.id, {relations: ['coffees']});
 
         if (machine) {
             ctx.status = 200;
