@@ -1,10 +1,10 @@
-import {BaseContext} from 'koa';
+import {BaseContext, ParameterizedContext} from 'koa';
 import {getConnection} from 'typeorm';
 import {User} from '../../src/models/user';
 
 export default class MockData {
 
-    public static async insertTestMeasurements(ctx: BaseContext) {
+    public static async insertTestMeasurements(ctx: ParameterizedContext) {
         const measurement = 'test_m';
         await ctx.influx.query(`DROP MEASUREMENT ${measurement}`);
         await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 0, y: 0, z: 0}}]);
