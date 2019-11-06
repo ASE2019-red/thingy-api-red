@@ -1,16 +1,14 @@
 import {InfluxDB} from 'influx';
-import MQTTTopicClient from '../mqtt/client';
+import MQTTTopicClient from '../../mqtt/client';
+import { TransformerFn } from '../thingy';
 
-class DataRecorder {
+export abstract class DataRecorder {
     public static topicDefinitions: any = {};
-    private mqttClient: MQTTTopicClient;
-    private influxClient: InfluxDB;
 
-    constructor(config: any, mqttClient: MQTTTopicClient, influxClient: InfluxDB) {
-        this.mqttClient = mqttClient;
-        this.influxClient = influxClient;
+    constructor(protected config: any, protected mqttClient: MQTTTopicClient) {
 
         // TODO: later we should store a list of all available sensors and their topics in the db
+        // or move them to the thingy lib
         DataRecorder.topicDefinitions = {
             thingy1: {
                 connected: `${config.macThingy1}/Connected`,
@@ -33,22 +31,11 @@ class DataRecorder {
         };
     }
 
-    public start(topic: string, measurement: string, tags: any = {}, callback: (message: Buffer) => any) {
+    public abstract start(topic: string, measurement: string, tags: any, transformer: TransformerFn): void;
 
-        this.mqttClient.onTopicMessage(topic, async (message: Buffer) => {
-            try {
-                const fields = callback(message);
-                await this.influxClient.writePoints([{measurement, tags, fields}]);
-            } catch (e) {
-                console.error('Cannot write to InfluxDB');
-                console.error(e);
-            }
-        });
-    }
+    public abstract stop(topic: string, measurement: string): void;
 
-    public stop(topic: string, measurement: string) {
-        // TODO
-    }
+    public abstract isRecording(): boolean;
 }
 
 export default DataRecorder;

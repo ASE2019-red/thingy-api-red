@@ -1,3 +1,4 @@
+import { InfluxDB } from 'influx';
 import {ParameterizedContext} from 'koa';
 
 export default class MeasurementController {
@@ -15,9 +16,10 @@ export default class MeasurementController {
 
     public static async getById(ctx: ParameterizedContext) {
         const id = ctx.params.id;
+        const influx: InfluxDB = ctx.influx;
 
         try {
-            const results = await ctx.influx.query(`SELECT * FROM ${id}`);
+            const results = await influx.query(`SELECT * FROM ${id} GROUP BY * ORDER BY DESC LIMIT 10`);
             ctx.status = 200;
             ctx.body = results;
 

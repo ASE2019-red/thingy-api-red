@@ -53,7 +53,8 @@ export default class MachineController {
 
         if (machine) {
             ctx.status = 200;
-            ctx.body = machine.coffees;
+            ctx.body = machine.coffees.length;
+            console.log(machine.coffees);
         } else {
             ctx.status = 400;
             ctx.body = 'The machine you are trying to retrieve coffees for does not exist!';

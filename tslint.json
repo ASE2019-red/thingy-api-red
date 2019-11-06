@@ -28,5 +28,7 @@
     "radix": false,
     "no-unused-expression": false
   },
-  "rulesDirectory": []
+  "rulesDirectory": [],
+  "interface-name": false,
+  "curly": false
 }

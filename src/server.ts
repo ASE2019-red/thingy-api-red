@@ -1,6 +1,7 @@
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
+import * as cors from 'koa-cors';
 import {Connection} from 'typeorm';
 import {qaRoutes} from '../test/web/routes';
 import {loadConfig} from './config';
@@ -8,7 +9,9 @@ import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
-import DataRecorder from './service/dataRecorder';
+import DataRecorder from './service/recorder/dataRecorder';
+import { InfluxDataRecorder } from './service/recorder/influxDataRecorder';
+import { gravityTransformer } from './service/thingy';
 
 async function bootstrap(samples: boolean) {
     try {
@@ -24,12 +27,16 @@ async function bootstrap(samples: boolean) {
 
         await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
 
-        const dataRecorder: DataRecorder = new DataRecorder(config.mqtt, mqtt, influx);
-        // dataRecorder.start(DataRecorder.topicDefinitions.thingy1.gravity);
+        const dataRecorder: DataRecorder = new InfluxDataRecorder(config.mqtt, mqtt, influx);
+        // dataRecorder.start(DataRecorder.topicDefinitions.thingy1.gravity, 'gravity',
+        //     {location: 'test'}, gravityTransformer);
 
         // Initialize the Koa application
         // tslint:disable-next-line:no-shadowed-variable
         const app: Koa = new Koa();
+
+        // cors
+        app.use(cors());
 
         // Logger
         app.use(async (ctx, next) => {

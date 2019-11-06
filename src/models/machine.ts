@@ -34,5 +34,5 @@ export class Machine {
     public updatedAt: Date;
 
     @OneToMany((type) => Coffee, (coffee) => coffee.machine)
-    public coffees: Coffee;
+    public coffees: Coffee[];
 }
