@@ -26,6 +26,10 @@ beforeAll(async () => {
     await mqtt.connect(config.mqtt);
 });
 
+afterAll(async () => {
+    await mqtt.disconnect();
+});
+
 beforeEach(async () => {
     measurement = 't_gravity';
     await influx.query(`DROP MEASUREMENT ${measurement}`);
@@ -82,6 +86,5 @@ test('Query measurements by tag', async () => {
     rows.forEach((row) => {
         console.log(row);
     });
-
     expect(rows.length).toBe(publications);
 });

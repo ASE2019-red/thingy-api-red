@@ -5,10 +5,10 @@ export class MQTTTopicClient {
     private client?: AsyncMqttClient;
     private topicMessageCallbacks = new Map<string, (message: Buffer) => void>();
 
-    public connect = async (config: {
+    public async connect(config: {
         hostname: string, port: string, user: string, password: string,
         macThingy1: string, macThingy2: string, macThingy3: string,
-    }) => {
+    }) {
         this.client = mqtt.connect({
             host: config.hostname,
             port: config.port,
@@ -31,6 +31,10 @@ export class MQTTTopicClient {
                 this.topicMessageCallbacks.get(topic)(payload);
             }
         });
+    }
+
+    public async disconnect() {
+        await this.client.end();
     }
 
     public onTopicMessage(topic: string, callback: (message: Buffer) => void) {

@@ -13,8 +13,8 @@
   "devDependencies": {
     "@types/jest": "24.0.18",
     "@types/koa": "^2.0.50",
-    "@types/koa-router": "^7.0.42",
     "@types/koa-bodyparser": "4.3.0",
+    "@types/koa-router": "^7.0.42",
     "@types/pg": "7.11.2",
     "@types/supertest": "2.0.8",
     "async-mqtt": "2.4.2",

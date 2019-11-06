@@ -4,6 +4,16 @@ import {User} from '../../src/models/user';
 
 export default class MockData {
 
+    public static async insertTestMeasurements(ctx: BaseContext) {
+        const measurement = 'test_m';
+        await ctx.influx.query(`DROP MEASUREMENT ${measurement}`);
+        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 0, y: 0, z: 0}}]);
+        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 1, y: 0, z: 0}}]);
+        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 2, y: 0, z: 0}}]);
+        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 3, y: 0, z: 0}}]);
+        ctx.status = 200;
+    }
+
     public static async createTestUsers(ctx: BaseContext) {
         try {
             await getConnection().createQueryBuilder()
