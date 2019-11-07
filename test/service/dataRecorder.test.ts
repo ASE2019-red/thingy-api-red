@@ -3,6 +3,7 @@ import {loadConfig} from '../../src/config';
 import MQTTTopicClient from '../../src/mqtt/client';
 import {influxConn} from '../../src/persistence/database';
 import DataRecorder from '../../src/service/recorder/dataRecorder';
+import { InfluxDataRecorder } from '../../src/service/recorder/influxDataRecorder';
 
 const randomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -36,7 +37,7 @@ beforeEach(async () => {
 });
 
 test('Add measurements', async () => {
-    const dataRecorder1: DataRecorder = new DataRecorder(config.mqtt, mqtt, influx);
+    const dataRecorder1: DataRecorder = new InfluxDataRecorder(config.mqtt, mqtt, influx);
     dataRecorder1.start('faketopic1', measurement, {}, (message: Buffer) => {
         return {x: randomInt(0, 10), y: randomInt(0, 10), z: randomInt(0, 10)};
     });
@@ -61,13 +62,13 @@ test('Add measurements', async () => {
 test('Query measurements by tag', async () => {
 
     const tags1 = {machine: 'ff-adrianos'};
-    const dataRecorder1: DataRecorder = new DataRecorder(config.mqtt, mqtt, influx);
+    const dataRecorder1: DataRecorder = new InfluxDataRecorder(config.mqtt, mqtt, influx);
     dataRecorder1.start('faketopic1', measurement, tags1, (message: Buffer) => {
         return {x: randomInt(0, 10), y: randomInt(0, 10), z: randomInt(0, 10)};
     });
 
     const tags2 = {machine: 'another one'};
-    const dataRecorder2: DataRecorder = new DataRecorder(config.mqtt, mqtt, influx);
+    const dataRecorder2: DataRecorder = new InfluxDataRecorder(config.mqtt, mqtt, influx);
     dataRecorder2.start('faketopic2', measurement, tags2, (message: Buffer) => {
         return {x: randomInt(0, 10), y: randomInt(0, 10), z: randomInt(0, 10)};
     });
