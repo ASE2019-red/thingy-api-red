@@ -1,7 +1,7 @@
+import * as cors from '@koa/cors';
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
-import * as cors from 'koa-cors';
 import {Connection} from 'typeorm';
 import {qaRoutes} from '../test/web/routes';
 import {loadConfig} from './config';
