@@ -1,6 +1,6 @@
-import {loadConfig} from '../../src/config';
-import MQTTTopicClient from '../../src/mqtt/client';
-import CoffeeDetector from '../../src/service/coffeeDetector';
+import {loadConfig} from '../../../src/config';
+import MQTTTopicClient from '../../../src/mqtt/client';
+import CoffeeDetector from '../../../src/service/coffeeDetector';
 
 /**
  * Script to test out the coffee detection. Usage:

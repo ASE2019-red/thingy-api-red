@@ -1,5 +1,5 @@
 import * as Router from 'koa-router';
-import TestData from '../persistence/mockdata';
+import TestData from '../unit/persistence/mockdata';
 
 const router = new Router();
 

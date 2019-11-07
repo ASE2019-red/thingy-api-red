@@ -3,7 +3,7 @@ import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
 import * as cors from 'koa-cors';
 import {Connection} from 'typeorm';
-import {qaRoutes} from '../test/web/routes';
+import {qaRoutes} from '../test/integration/routes';
 import {loadConfig} from './config';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
