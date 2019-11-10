@@ -10,8 +10,8 @@ import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
 import DataRecorder from './service/recorder/dataRecorder';
-import { InfluxDataRecorder } from './service/recorder/influxDataRecorder';
-import { gravityTransformer } from './service/thingy';
+import {InfluxGravityDataRecorder} from './service/recorder/influxGravityDataRecorder';
+import {gravityTransformer} from './service/thingy';
 
 async function bootstrap(samples: boolean) {
     try {
@@ -27,7 +27,7 @@ async function bootstrap(samples: boolean) {
 
         await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
 
-        const dataRecorder: DataRecorder = new InfluxDataRecorder(config.mqtt, mqtt, influx);
+        const dataRecorder: DataRecorder = new InfluxGravityDataRecorder(mqtt, influx, config.mqtt.macThingy1);
         // dataRecorder.start(DataRecorder.topicDefinitions.thingy1.gravity, 'gravity',
         //     {location: 'test'}, gravityTransformer);
 

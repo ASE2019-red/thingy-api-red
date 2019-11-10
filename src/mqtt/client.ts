@@ -22,7 +22,7 @@ export class MQTTTopicClient {
             throw new Error(`Cannot connect to MQTT broker. ${err}`);
         });
 
-        this.client.on('connected', () => {
+        this.client.on('connect', () => {
             console.log('Successfully connected to MQTT broker');
         });
 
