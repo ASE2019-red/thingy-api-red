@@ -27,9 +27,8 @@ async function bootstrap(samples: boolean) {
 
         await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
 
-        const dataRecorder: DataRecorder = new InfluxGravityDataRecorder(mqtt, influx, config.mqtt.macThingy1);
-        // dataRecorder.start(DataRecorder.topicDefinitions.thingy1.gravity, 'gravity',
-        //     {location: 'test'}, gravityTransformer);
+        // const dataRecorder: DataRecorder = new InfluxGravityDataRecorder(mqtt, influx, config.mqtt.macThingy1);
+        // dataRecorder.start('gravity', {location: 'test'}, gravityTransformer);
 
         // Initialize the Koa application
         // tslint:disable-next-line:no-shadowed-variable
