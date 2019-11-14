@@ -3,7 +3,7 @@ import {loadConfig} from '../../src/config';
 import MQTTTopicClient from '../../src/mqtt/client';
 import {influxConn} from '../../src/persistence/database';
 import DataRecorder from '../../src/service/recorder/dataRecorder';
-import {InfluxGravityDataRecorder} from '../../src/service/recorder/influxGravityDataRecorder';
+import {InfluxDataRecorder} from '../../src/service/recorder/influxDataRecorder';
 
 const randomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -42,7 +42,7 @@ beforeEach(async () => {
 });
 
 test('Add measurements', async () => {
-    const dataRecorder1: DataRecorder = new InfluxGravityDataRecorder(mqtt, influx, 'fakeThingy');
+    const dataRecorder1: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy');
     dataRecorder1.start(measurement, {}, fakeTransformer);
 
     // Send fake messages
@@ -61,11 +61,11 @@ test('Add measurements', async () => {
 test('Query measurements by tag', async () => {
 
     const tags1 = {machine: 'ff-adrianos'};
-    const dataRecorder1: DataRecorder = new InfluxGravityDataRecorder(mqtt, influx, 'fakeThingy1');
+    const dataRecorder1: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy1');
     dataRecorder1.start(measurement, tags1, fakeTransformer);
 
     const tags2 = {machine: 'another one'};
-    const dataRecorder2: DataRecorder = new InfluxGravityDataRecorder(mqtt, influx, 'fakeThingy2');
+    const dataRecorder2: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy2');
     dataRecorder2.start(measurement, tags2, fakeTransformer);
 
     // Send fake messages

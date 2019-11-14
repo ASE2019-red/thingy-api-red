@@ -3,7 +3,7 @@ import MQTTTopicClient from '../../mqtt/client';
 import {TransformerFn} from '../thingy';
 import {DataRecorder} from './dataRecorder';
 
-export class InfluxGravityDataRecorder extends DataRecorder {
+export class InfluxDataRecorder extends DataRecorder {
     private record = false;
 
     // simple limit for db writes
@@ -23,8 +23,7 @@ export class InfluxGravityDataRecorder extends DataRecorder {
             //     return;
             // }
             try {
-                const data = transformer(message);
-                const fields = {x: data[0], y: data[1], z: data[2]};
+                const fields = transformer(message);
                 await this.influxClient.writePoints([{measurement, tags, fields}]);
             } catch (e) {
                 console.error('Cannot write to InfluxDB');
