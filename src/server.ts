@@ -1,4 +1,5 @@
 import * as cors from '@koa/cors';
+import * as http from 'http';
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
@@ -12,6 +13,7 @@ import CoffeeDetector from './service/coffeeDetector';
 import DataRecorder from './service/recorder/dataRecorder';
 import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
 import { gravityTransformerTagged } from './service/thingy';
+import Websocket from './websocket';
 
 async function bootstrap(samples: boolean) {
     try {
@@ -57,17 +59,24 @@ async function bootstrap(samples: boolean) {
             app.use(qaRoutes);
         }
 
+        // Startup app
+        app.use(bodyParser());
+        app.use(routes);
+
+        const server: http.Server = http.createServer(app.callback());
+        const wsh: Websocket = new Websocket(server);
+
+        wsh.listen();
+
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
         app.context.mqtt = mqtt;
+        app.context.wsh = wsh;
 
-        // Startup app
-        app.use(bodyParser());
-        app.use(routes);
-        app.listen(config.port);
-
-        console.log(`Server running on http://localhost:${config.port} 🚀`);
+        server.listen(config.port, () => {
+            console.log(`Server running on http://localhost:${config.port} 🚀`);
+        });
 
         return app;
 
