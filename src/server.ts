@@ -3,15 +3,15 @@ import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
 import {Connection} from 'typeorm';
-import {qaRoutes} from '../test/web/routes';
+import {qaRoutes} from '../test/integration/routes';
 import {loadConfig} from './config';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
 import DataRecorder from './service/recorder/dataRecorder';
-import { InfluxDataRecorder } from './service/recorder/influxDataRecorder';
-import { gravityTransformer } from './service/thingy';
+import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
+import { gravityTransformerTagged } from './service/thingy';
 
 async function bootstrap(samples: boolean) {
     try {
@@ -27,9 +27,8 @@ async function bootstrap(samples: boolean) {
 
         await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
 
-        const dataRecorder: DataRecorder = new InfluxDataRecorder(config.mqtt, mqtt, influx);
-        // dataRecorder.start(DataRecorder.topicDefinitions.thingy1.gravity, 'gravity',
-        //     {location: 'test'}, gravityTransformer);
+        // const dataRecorder: DataRecorder = new InfluxDataRecorder(mqtt, influx, config.mqtt.macThingy1);
+        // dataRecorder.start('gravity', {location: 'test'}, gravityTransformerTagged);
 
         // Initialize the Koa application
         // tslint:disable-next-line:no-shadowed-variable
