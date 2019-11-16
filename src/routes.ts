@@ -2,6 +2,7 @@ import * as Router from 'koa-router';
 import CoffeeController from './controllers/coffee';
 import MachineController from './controllers/machine';
 import MeasurementController from './controllers/measurement';
+import NotificationController from './controllers/notification';
 import userController from './controllers/user';
 
 const router = new Router();
@@ -27,5 +28,8 @@ router.get('/users/:id', userController.getUser);
 // Measurement endpoint
 router.get('/measurements', MeasurementController.getAll);
 router.get('/measurements/:id', MeasurementController.getById);
+
+// notification endpoint
+router.get('/notifications/notifiers', NotificationController.getNotifiers);
 
 export const routes = router.routes();

@@ -12,7 +12,8 @@ import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
 import DataRecorder from './service/recorder/dataRecorder';
 import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
-import { gravityTransformerTagged } from './service/thingy';
+import {gravityTransformerTagged} from './service/thingy';
+import {randomInt} from './util/util';
 import Websocket from './websocket';
 
 async function bootstrap(samples: boolean) {
@@ -65,8 +66,11 @@ async function bootstrap(samples: boolean) {
 
         const server: http.Server = http.createServer(app.callback());
         const wsh: Websocket = new Websocket(server);
-
         wsh.listen();
+
+        setInterval(() => {
+            wsh.broadcast(randomInt(1, 10));
+        }, 1000);
 
         // Bind DB connections to context
         app.context.influx = influx;

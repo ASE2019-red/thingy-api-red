@@ -4,14 +4,7 @@ import MQTTTopicClient from '../../src/mqtt/client';
 import {influxConn} from '../../src/persistence/database';
 import DataRecorder from '../../src/service/recorder/dataRecorder';
 import {InfluxDataRecorder} from '../../src/service/recorder/influxDataRecorder';
-
-const randomInt = (min: number, max: number) => {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
-const sleep = (milliseconds: number) => {
-    return new Promise((resolve) => setTimeout(resolve, milliseconds));
-};
+import {randomInt, sleep} from '../../src/util/util';
 
 const fakeTransformer = (data: Buffer) => {
     console.log('fake transform...');

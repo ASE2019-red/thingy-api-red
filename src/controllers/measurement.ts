@@ -1,4 +1,4 @@
-import { InfluxDB } from 'influx';
+import {InfluxDB} from 'influx';
 import {ParameterizedContext} from 'koa';
 
 export default class MeasurementController {
@@ -9,8 +9,8 @@ export default class MeasurementController {
             ctx.body = await ctx.influx.query(`SHOW MEASUREMENTS`);
 
         } catch (err) {
-            ctx.status = 400;
-            ctx.body = `The measurement ${name} cannot be found`;
+            ctx.status = 500;
+            ctx.body = `Cannot query measurements`;
         }
     }
 
@@ -25,7 +25,7 @@ export default class MeasurementController {
 
         } catch (err) {
             ctx.status = 400;
-            ctx.body = `The measurement ${name} cannot be found`;
+            ctx.body = `The measurement ${id} cannot be found`;
         }
     }
 }
