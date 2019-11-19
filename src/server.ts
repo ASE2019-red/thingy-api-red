@@ -56,11 +56,11 @@ async function bootstrap() {
         // Startup app
         app.use(bodyParser());
         app.use(routes);
-        const server = app.listen(config.port);
+        const newServer = app.listen(config.port);
 
         console.log(`Server running on http://localhost:${config.port} 🚀`);
 
-        return server;
+        return newServer;
 
     } catch (err) {
         console.log(err);

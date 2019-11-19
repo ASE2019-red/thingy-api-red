@@ -1,7 +1,7 @@
 import { Connection, getConnection, getRepository } from 'typeorm';
 import {getManager} from 'typeorm';
-import { Machine } from '../../src/models/machine';
 import { Coffee } from '../../src/models/coffee';
+import { Machine } from '../../src/models/machine';
 
 // important: Call after 'await server' to assure db connection is up
 export async function cleanAllTables() {
