@@ -31,7 +31,7 @@ export const pgConn = async (config: {hostname: string, port: number, user: stri
         database: config.dbname,
         password: config.password,
         entities: [User, Coffee, Machine],
-        logging: true,
+        logging: ['error'],
         synchronize: true,
     });
 

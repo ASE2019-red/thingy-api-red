@@ -57,6 +57,10 @@ async function bootstrap() {
         app.use(bodyParser());
         app.use(routes);
         const newServer = app.listen(config.port);
+        newServer.on('close', () => {
+            pg.close();
+            mqtt.disconnect();
+        });
 
         console.log(`Server running on http://localhost:${config.port} 🚀`);
 
