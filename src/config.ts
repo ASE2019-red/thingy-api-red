@@ -17,7 +17,7 @@ export function loadConfig() {
         postgres: {
             hostname: process.env.POSTGRES_HOST,
             port: parseInt(process.env.POSTGRES_PORT),
-            dbname: process.env.NODE_ENV == 'rrr' ? process.env.TEST_DB : process.env.APP_DB,
+            dbname: process.env.NODE_ENV == 'test' ? process.env.TEST_DB : process.env.APP_DB,
             user: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
         },
