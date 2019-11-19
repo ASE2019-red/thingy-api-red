@@ -37,6 +37,7 @@ services:
       - ${NODE_PORT}:8000
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - .:/app
     depends_on:
       - influx
       - postgres

@@ -6,5 +6,5 @@ module.exports = {
         "^.+\\.tsx?$": "ts-jest"
     },
     "verbose": true,
-    "forceExit": true
+    "testEnvironment": "node"
 };

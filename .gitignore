@@ -53,12 +53,17 @@ typings/
 
 # Yarn Integrity file
 .yarn-integrity
+# Yarn lock
+yarn.lock
 
 # dotenv environment variables file
 .env
 
 # next.js build output
 .next
+
+#ide
+.vscode
 
 dist/
 .idea
