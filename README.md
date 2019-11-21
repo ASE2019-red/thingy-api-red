@@ -6,7 +6,9 @@ Before starting the server, copy .env.example as .env and fill in the TODO field
 
 ## API
 
-### Draft API definition
+### API definition
+
+The definition of the API can be found in the [swagger.yaml](./swagger.yaml) file.
 
 `/measurement/:name/` => Get all measurements of sensor   
 `/measurement/:name/?from=<date>&to=<date>` => Get measurement between timerange
