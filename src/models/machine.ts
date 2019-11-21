@@ -35,8 +35,4 @@ export class Machine {
 
     @OneToMany((type) => Coffee, (coffee) => coffee.machine)
     public coffees: Coffee[];
-
-    @Column('number')
-    // how many coffees the machine can produce until it needs service
-    public maintenanceThreshold: number;
 }
