@@ -24,9 +24,9 @@ export class User {
     @Column('text')
     public hashedPassword: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamptz' })
     public createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ type: 'timestamptz' })
     public updatedAt: Date;
 }

@@ -1,8 +1,8 @@
-import {ParameterizedContext} from 'koa';
-import {getManager} from 'typeorm';
-import {Machine} from '../models/machine';
-import CoffeeDetector from '../service/coffeeDetector';
+import { ParameterizedContext } from 'koa';
+import { getManager } from 'typeorm';
 import { Coffee } from '../models/coffee';
+import { Machine } from '../models/machine';
+import CoffeeDetector from '../service/coffeeDetector';
 
 export default class MachineController {
 
@@ -50,23 +50,23 @@ export default class MachineController {
     }
 
     public static async getMachineCoffees(ctx: ParameterizedContext) {
-        let machine =  await MachineController.repository.findOne()
+        const machine = await MachineController.repository.findOne();
 
         if (machine) {
             let query = getManager().createQueryBuilder(Coffee, 'coffee')
-            .where('coffee.machine_id = :id', { id: ctx.params.id })
+                .where('coffee.machine_id = :id', { id: ctx.params.id });
 
             if (ctx.query.after) {
-            query = query.where('coffee.createdAt >= :date', { date: ctx.query.after});
+                query = query.where('coffee.createdAt >= :date', { date: ctx.query.after });
             }
 
             if (ctx.query.before) {
-            query = query.where('coffee.createdAt <= :date', { date: ctx.query.before});
+                query = query.where('coffee.createdAt <= :date', { date: ctx.query.before });
             }
 
             const coffees = await query.getMany();
             ctx.status = 200;
-            ctx.body = coffees;
+            ctx.body = coffees.length;
         } else {
             ctx.status = 400;
             ctx.body = 'The machine you are trying to retrieve coffees for does not exist!';

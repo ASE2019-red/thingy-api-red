@@ -1,6 +1,6 @@
-import {ParameterizedContext} from 'koa';
-import {getManager} from 'typeorm';
-import {Coffee} from '../models/coffee';
+import { ParameterizedContext } from 'koa';
+import { getManager } from 'typeorm';
+import { Coffee } from '../models/coffee';
 
 export default class CoffeeController {
 
@@ -10,25 +10,24 @@ export default class CoffeeController {
 
     public static async getCoffees(ctx: ParameterizedContext) {
         let query = getManager().createQueryBuilder(Coffee, 'coffee')
-                                .leftJoinAndSelect('coffee.machine', 'machine')
+            .leftJoinAndSelect('coffee.machine', 'machine');
 
         if (ctx.query.after) {
-            query = query.where('coffee.createdAt >= :date', { date: ctx.query.after});
+            query = query.where('coffee.createdAt >= :date', { date: ctx.query.after });
         }
 
         if (ctx.query.before) {
-            query = query.where('coffee.createdAt <= :date', { date: ctx.query.before});
+            query = query.where('coffee.createdAt <= :date', { date: ctx.query.before });
         }
 
         const coffees = await query.getMany();
 
         ctx.status = 200;
         ctx.body = coffees;
-    
     }
 
     public static async getCoffee(ctx: ParameterizedContext) {
-        const coffee = await CoffeeController.repository.findOne(ctx.params.id, {relations: ['machine']});
+        const coffee = await CoffeeController.repository.findOne(ctx.params.id, { relations: ['machine'] });
 
         if (coffee) {
             ctx.status = 200;
