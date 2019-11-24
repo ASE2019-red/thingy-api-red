@@ -12,6 +12,9 @@ import CoffeeDetector from './service/coffeeDetector';
 import DataRecorder from './service/recorder/dataRecorder';
 import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
 import { gravityTransformerTagged } from './service/thingy';
+import * as session from 'koa-session';
+import * as passport from 'koa-passport';
+
 
 async function bootstrap(samples: boolean) {
     try {
@@ -36,6 +39,13 @@ async function bootstrap(samples: boolean) {
 
         // cors
         app.use(cors());
+
+        // sessions
+        app.use(session(app));
+
+        // passport
+        app.use(passport.initialize());
+        app.use(passport.session())
 
         // Logger
         app.use(async (ctx, next) => {

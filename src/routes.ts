@@ -3,10 +3,12 @@ import CoffeeController from './controllers/coffee';
 import MachineController from './controllers/machine';
 import MeasurementController from './controllers/measurement';
 import userController from './controllers/user';
+import { jwt } from './middlewares/jwt';
+import AuthenticationController from './middlewares/authentication';
 
 const router = new Router();
 
-router.get('/ping', (context) => {
+router.get('/ping', AuthenticationController.requireLogin, (context) => {
     context.status = 200;
     context.body = 'pong';
 });
@@ -22,7 +24,10 @@ router.get('/machine/:id', MachineController.getMachine);
 router.post('/machine', MachineController.createMachine);
 
 // User endpoint
-router.get('/users/:id', userController.getUser);
+router.get('/user/:id', userController.getUser);
+router.post('/user', userController.registerUser);
+router.post('/user/login', userController.login);
+router.delete('/user', userController.logout);
 
 // Measurement endpoint
 router.get('/measurements', MeasurementController.getAll);
