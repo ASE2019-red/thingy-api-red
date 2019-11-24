@@ -10,9 +10,6 @@ import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
-import DataRecorder from './service/recorder/dataRecorder';
-import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
-import {gravityTransformerTagged} from './service/thingy';
 import {randomInt} from './util/util';
 import Websocket from './websocket';
 
@@ -65,18 +62,22 @@ async function bootstrap(samples: boolean) {
         app.use(routes);
 
         const server: http.Server = http.createServer(app.callback());
-        const wsh: Websocket = new Websocket(server);
-        wsh.listen();
 
-        setInterval(() => {
-            wsh.broadcast(randomInt(1, 10));
+        const liveGravityWs: Websocket = new Websocket(server, '/measurements/live/gravity');
+        await liveGravityWs.broadcastInterval(async () => {
+            const result = await influx.query(`SELECT SUM(*) FROM gravity GROUP BY time(1m) LIMIT 10`);
+            return JSON.stringify(result);
+        }, 100);
+
+        const notificationsWs: Websocket = new Websocket(server, '/notifications');
+        await notificationsWs.broadcastInterval(async () => {
+            return randomInt(1, 100);
         }, 1000);
 
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
         app.context.mqtt = mqtt;
-        app.context.wsh = wsh;
 
         server.listen(config.port, () => {
             console.log(`Server running on http://localhost:${config.port} 🚀`);
