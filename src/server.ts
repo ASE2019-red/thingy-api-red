@@ -41,6 +41,7 @@ async function bootstrap(samples: boolean) {
         app.use(cors());
 
         // sessions
+        app.keys = ['Super secret session key 1', 'Another super secret session key 2'];
         app.use(session(app));
 
         // passport

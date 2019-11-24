@@ -7,7 +7,7 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('users')
+@Entity()
 export class User {
 
     @PrimaryGeneratedColumn('uuid')
@@ -23,6 +23,9 @@ export class User {
 
     @Column('text')
     public hashedPassword: string;
+
+    @Column('boolean')
+    public active: boolean;
 
     @CreateDateColumn()
     public createdAt: Date;

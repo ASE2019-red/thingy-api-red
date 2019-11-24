@@ -2,7 +2,7 @@ import * as Router from 'koa-router';
 import CoffeeController from './controllers/coffee';
 import MachineController from './controllers/machine';
 import MeasurementController from './controllers/measurement';
-import userController from './controllers/user';
+import UserController from './controllers/user';
 import { jwt } from './middlewares/jwt';
 import AuthenticationController from './middlewares/authentication';
 
@@ -24,10 +24,13 @@ router.get('/machine/:id', MachineController.getMachine);
 router.post('/machine', MachineController.createMachine);
 
 // User endpoint
-router.get('/user/:id', userController.getUser);
-router.post('/user', userController.registerUser);
-router.post('/user/login', userController.login);
-router.delete('/user', userController.logout);
+router.get('/user', UserController.getUsers);
+router.get('/user/:id', UserController.getUser);
+router.post('/user', UserController.registerUser);
+router.post('/user/:id', UserController.updateUser);
+router.post('/login', UserController.login);
+router.post('/logout/:id', UserController.logout);
+router.delete('/user/:id', UserController.deleteUser)
 
 // Measurement endpoint
 router.get('/measurements', MeasurementController.getAll);
