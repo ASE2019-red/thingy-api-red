@@ -6,8 +6,7 @@ export class MQTTTopicClient {
     private topicMessageCallbacks = new Map<string, (message: Buffer) => void>();
 
     public async connect(config: {
-        hostname: string, port: string, user: string, password: string,
-        macThingy1: string, macThingy2: string, macThingy3: string,
+        hostname: string, port: string, user: string, password: string
     }) {
         this.client = mqtt.connect({
             host: config.hostname,
