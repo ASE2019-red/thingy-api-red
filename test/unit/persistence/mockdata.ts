@@ -1,16 +1,21 @@
 import {BaseContext, ParameterizedContext} from 'koa';
 import {getConnection} from 'typeorm';
 import {User} from '../../../src/models/user';
+import {sleep} from '../../../src/util/util';
 
 export default class MockData {
 
     public static async insertTestMeasurements(ctx: ParameterizedContext) {
         const measurement = 'test_m';
         await ctx.influx.query(`DROP MEASUREMENT ${measurement}`);
-        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 0, y: 0, z: 0}}]);
-        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 1, y: 0, z: 0}}]);
-        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 2, y: 0, z: 0}}]);
-        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 3, y: 0, z: 0}}]);
+        await sleep(1000);
+        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 0, y: 6, z: 4}}]);
+        await sleep(1000);
+        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 1, y: 8, z: 3}}]);
+        await sleep(1000);
+        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 2, y: 1, z: 2}}]);
+        await sleep(1000);
+        await ctx.influx.writePoints([{measurement, tags: {name: 'asdf'}, fields: {x: 3, y: 7, z: 1}}]);
         ctx.status = 200;
     }
 

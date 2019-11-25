@@ -1,5 +1,6 @@
 import {InfluxDB} from 'influx';
 import {ParameterizedContext} from 'koa';
+import {sleep} from '../util/util';
 
 export default class MeasurementController {
 
@@ -27,5 +28,20 @@ export default class MeasurementController {
             ctx.status = 400;
             ctx.body = `The measurement ${id} cannot be found`;
         }
+    }
+
+    public static async wsGetByTimeSlot(ctx: ParameterizedContext) {
+        // await ctx.influx.writePoints([{measurement: 'gravity', tags: {name: 'ff-office'},
+        //      fields: {x: 1, y: 2, z: 3}}]);
+        // await sleep(1000);
+        // await ctx.influx.writePoints([{measurement: 'gravity', tags: {name: 'ff-office'},
+        //      fields: {x: 2, y: 6, z: 2}}]);
+        // await sleep(1000);
+        // await ctx.influx.writePoints([{measurement: 'gravity', tags: {name: 'ff-office'},
+        //      fields: {x: 3, y: 2, z: 1}}]);
+
+        // TODO: Time range selection
+        const result = await ctx.influx.query(`SELECT SUM(*) FROM gravity WHERE time > now() - 5m GROUP BY time(1m) fill(0)`);
+        return JSON.stringify(result);
     }
 }

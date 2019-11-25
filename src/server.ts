@@ -6,12 +6,13 @@ import * as bodyParser from 'koa-bodyparser';
 import {Connection} from 'typeorm';
 import {qaRoutes} from '../test/integration/routes';
 import {loadConfig} from './config';
+import MeasurementController from './controllers/measurement';
+import NotificationController from './controllers/notification';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
-import {randomInt} from './util/util';
-import Websocket from './websocket';
+import {Websocket, WebsocketFactory} from './websocket';
 
 async function bootstrap(samples: boolean) {
     try {
@@ -63,16 +64,12 @@ async function bootstrap(samples: boolean) {
 
         const server: http.Server = http.createServer(app.callback());
 
-        const liveGravityWs: Websocket = new Websocket(server, '/measurements/live/gravity');
-        await liveGravityWs.broadcastInterval(async () => {
-            const result = await influx.query(`SELECT SUM(*) FROM gravity GROUP BY time(1m) LIMIT 10`);
-            return JSON.stringify(result);
-        }, 100);
+        const wsFactory: WebsocketFactory = WebsocketFactory.getInstance(server, app.context);
+        const liveGravityWs: Websocket = wsFactory.newSocket('/measurements/live/gravity');
+        liveGravityWs.broadcastInterval(MeasurementController.wsGetByTimeSlot, 1000);
 
-        const notificationsWs: Websocket = new Websocket(server, '/notifications');
-        await notificationsWs.broadcastInterval(async () => {
-            return randomInt(1, 100);
-        }, 1000);
+        const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
+        notificationsWs.broadcastInterval(NotificationController.wsNotify, 1000);
 
         // Bind DB connections to context
         app.context.influx = influx;
