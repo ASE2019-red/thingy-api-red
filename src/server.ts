@@ -3,17 +3,13 @@ import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
 import {Connection} from 'typeorm';
-import {qaRoutes} from '../test/integration/routes';
 import {loadConfig} from './config';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
-import DataRecorder from './service/recorder/dataRecorder';
-import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
-import { gravityTransformerTagged } from './service/thingy';
 
-async function bootstrap(samples: boolean) {
+async function bootstrap() {
     try {
         const config = loadConfig();
 
@@ -52,11 +48,6 @@ async function bootstrap(samples: boolean) {
             ctx.set('X-Response-Time', `${ms}ms`);
         });
 
-        // Only registry testdata routes if flag is set
-        if (samples) {
-            app.use(qaRoutes);
-        }
-
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
@@ -65,16 +56,21 @@ async function bootstrap(samples: boolean) {
         // Startup app
         app.use(bodyParser());
         app.use(routes);
-        app.listen(config.port);
+        const newServer = app.listen(config.port);
+        newServer.on('close', () => {
+            pg.close();
+            mqtt.disconnect();
+        });
 
         console.log(`Server running on http://localhost:${config.port} 🚀`);
 
-        return app;
+        return newServer;
 
     } catch (err) {
+        console.log(err);
         console.error(`Error occurred during startup. \n\t${err}`);
         process.exit(1);
     }
 }
 
-export const app = bootstrap(true);
+export const server = bootstrap();
