@@ -3,7 +3,7 @@ import * as http from 'http';
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
-import koaSwagger from 'koa2-swagger-ui';
+import {KoaSwaggerUiOptions} from 'koa2-swagger-ui';
 import {Connection} from 'typeorm';
 import {qaRoutes} from '../test/integration/routes';
 import {loadConfig} from './config';
@@ -14,6 +14,10 @@ import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
 import {Websocket, WebsocketFactory} from './websocket';
+
+type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middleware;
+// tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
+const koaSwagger = require('koa2-swagger-ui') as koa2SwaggerUiFunc;
 
 async function bootstrap(samples: boolean) {
     try {
@@ -76,9 +80,7 @@ async function bootstrap(samples: boolean) {
         app.use(
             koaSwagger({
                 routePrefix: '/',
-                swaggerOptions: {
-                    url: 'https://raw.githubusercontent.com/ASE2019-red/thingy-api-red/swagger/swagger.yaml',
-                },
+                swaggerOptions: {url: config.swaggerApiUrl},
             }),
         );
 
