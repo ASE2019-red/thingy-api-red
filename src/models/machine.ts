@@ -35,4 +35,7 @@ export class Machine {
 
     @OneToMany((type) => Coffee, (coffee) => coffee.machine)
     public coffees: Coffee[];
+
+    @Column('integer', {nullable: true})
+    public maintenanceThreshold?: number;
 }
