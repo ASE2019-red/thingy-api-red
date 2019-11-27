@@ -18,7 +18,7 @@ export function loadConfig() {
         postgres: {
             hostname: process.env.POSTGRES_HOST,
             port: parseInt(process.env.POSTGRES_PORT),
-            dbname: process.env.POSTGRES_DB,
+            dbname: process.env.NODE_ENV == 'test' ? process.env.TEST_DB : process.env.APP_DB,
             user: process.env.POSTGRES_USER,
             password: process.env.POSTGRES_PASSWORD,
         },
@@ -28,10 +28,9 @@ export function loadConfig() {
             port: process.env.MQTT_PORT,
             user: process.env.MQTT_USER,
             password: process.env.MQTT_PW,
+            accelerationTopic: process.env.ACCELERATION_TOPIC,
             macThingy1: process.env.MAC_THINGY1,
             macThingy2: process.env.MAC_THINGY2,
-            macThingy3: process.env.MAC_THINGY3,
-            accelerationTopic: process.env.ACCELERATION_TOPIC,
         },
     };
 }

@@ -7,7 +7,6 @@ export class MQTTTopicClient {
 
     public async connect(config: {
         hostname: string, port: string, user: string, password: string,
-        macThingy1: string, macThingy2: string, macThingy3: string,
     }) {
         this.client = mqtt.connect({
             host: config.hostname,

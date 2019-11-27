@@ -5,7 +5,6 @@ import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
 import {KoaSwaggerUiOptions} from 'koa2-swagger-ui';
 import {Connection} from 'typeorm';
-import {qaRoutes} from '../test/integration/routes';
 import {loadConfig} from './config';
 import MeasurementController from './controllers/measurement';
 import NotificationController from './controllers/notification';
@@ -19,7 +18,7 @@ type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middlewar
 // tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
 const koaSwagger = require('koa2-swagger-ui') as koa2SwaggerUiFunc;
 
-async function bootstrap(samples: boolean) {
+async function bootstrap() {
     try {
         const config = loadConfig();
 
@@ -58,24 +57,18 @@ async function bootstrap(samples: boolean) {
             ctx.set('X-Response-Time', `${ms}ms`);
         });
 
-        // Only registry testdata routes if flag is set
-        if (samples) {
-            app.use(qaRoutes);
-        }
-
         // Startup app
         app.use(bodyParser());
         app.use(routes);
 
-        const server: http.Server = http.createServer(app.callback());
+        const newServer: http.Server = http.createServer(app.callback());
 
-        const wsFactory: WebsocketFactory = WebsocketFactory.getInstance(server, app.context);
+        const wsFactory: WebsocketFactory = WebsocketFactory.getInstance(newServer, app.context);
         const liveGravityWs: Websocket = wsFactory.newSocket('/measurements/live/gravity');
         liveGravityWs.broadcastInterval(MeasurementController.wsGetByTimeSlot, 1000);
 
         const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
         notificationsWs.broadcastInterval(NotificationController.wsNotify, 1000);
-
         // Deliver swagger user interface
         app.use(
             koaSwagger({
@@ -89,16 +82,23 @@ async function bootstrap(samples: boolean) {
         app.context.pg = pg;
         app.context.mqtt = mqtt;
 
-        server.listen(config.port, () => {
+        newServer.on('close', async () => {
+            pg.close();
+            mqtt.disconnect();
+            console.log(`Server closed`);
+        });
+
+        newServer.listen(config.port, () => {
             console.log(`Server running on http://localhost:${config.port} 🚀`);
         });
 
-        return app;
+        return newServer;
 
     } catch (err) {
+        console.log(err);
         console.error(`Error occurred during startup. \n\t${err}`);
         process.exit(1);
     }
 }
 
-export const app = bootstrap(true);
+export const server = bootstrap();
