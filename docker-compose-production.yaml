@@ -1,0 +1,45 @@
+version: "3"
+
+networks:
+  default:
+    external: false
+
+volumes:
+  influx_data:
+  postgres_data:
+  api_data:
+
+services:
+  influx:
+    image: influxdb:1.7-alpine
+    ports:
+      - ${INFLUXDB_PORT}:8086
+    volumes:
+      - influx_data:/var/lib/influxdb
+      - /resources/init-fluxdb:/docker-entrypoint-initdb.d
+      - /etc/localtime:/etc/localtime:ro
+    env_file: [.env]
+
+  postgres:
+    image: postgres:11-alpine
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - /resources/init-postgres:/docker-entrypoint-initdb.d
+    env_file: [.env]
+
+  api:
+    image: ase2019red/thingy-api-red:latest
+    restart: on-failure
+    ports:
+      - 8000:8000
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - influx
+      - postgres
+    env_file: [.env]
+    environment:
+      INFLUXDB_HOST: influx
+      POSTGRES_HOST: postgres
