@@ -17,7 +17,7 @@ export default class NotificationController {
         }
     }
 
-    public static async wsNotify(ctx: ParameterizedContext) {
+    public static async wsNotify(ctx: ParameterizedContext, params: any) {
         // TODO: Detect new coffee consumption
         return randomInt(1, 100);
     }
