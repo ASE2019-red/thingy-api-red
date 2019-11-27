@@ -28,10 +28,10 @@ export default class MachineController {
             const savedMachine = await MachineController.repository.save(newMachine);
             CoffeeDetector.createForMachine(savedMachine, ctx.mqtt);
 
-            ctx.status = 200;
+            ctx.status = 201;
             ctx.body = savedMachine;
         } catch {
-            ctx.status = 500;
+            ctx.status = 422;
             ctx.body = 'Saving the machine failed';
         }
 
