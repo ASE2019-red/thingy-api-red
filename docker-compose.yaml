@@ -27,6 +27,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./resources/init-postgres:/docker-entrypoint-initdb.d
+      - /etc/localtime:/etc/localtime:ro
     env_file: [.env]
 
   api:
@@ -37,7 +38,6 @@ services:
       - ${NODE_PORT}:8000
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - .:/app
     depends_on:
       - influx
       - postgres
