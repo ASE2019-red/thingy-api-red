@@ -3,6 +3,7 @@ import * as http from 'http';
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
+import koaSwagger from 'koa2-swagger-ui';
 import {Connection} from 'typeorm';
 import {qaRoutes} from '../test/integration/routes';
 import {loadConfig} from './config';
@@ -70,6 +71,16 @@ async function bootstrap(samples: boolean) {
 
         const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
         notificationsWs.broadcastInterval(NotificationController.wsNotify, 1000);
+
+        // Deliver swagger user interface
+        app.use(
+            koaSwagger({
+                routePrefix: '/',
+                swaggerOptions: {
+                    url: 'https://raw.githubusercontent.com/ASE2019-red/thingy-api-red/swagger/swagger.yaml',
+                },
+            }),
+        );
 
         // Bind DB connections to context
         app.context.influx = influx;
