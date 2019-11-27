@@ -17,14 +17,14 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner:
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: 
 --
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner:
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
 --
 
 COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
@@ -58,7 +58,8 @@ CREATE TABLE public.machine (
     "sensorIdentifier" text NOT NULL,
     active boolean NOT NULL,
     "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
-    "updatedAt" timestamp without time zone DEFAULT now() NOT NULL
+    "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
+    "maintenanceThreshold" integer
 );
 
 
@@ -107,9 +108,10 @@ d8c5adb4-e527-460b-8ce9-cf08c4e34e41	2019-11-06 18:40:36.874073	2019-11-06 18:40
 -- Data for Name: machine; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.machine (id, name, "sensorIdentifier", active, "createdAt", "updatedAt") FROM stdin;
-1b607aec-d887-4586-b8ba-c52d28dbfcbe	testmachine	e8:e0:72:6b:92:a3	t	2019-11-06 18:37:58.727858	2019-11-06 18:37:58.727858
-577d4eea-050c-406c-b300-5ebaaac3c9ea	fakemachine	e8:e0:72:6b:92:a3	f	2019-11-06 18:38:39.615769	2019-11-06 18:38:39.615769
+COPY public.machine (id, name, "sensorIdentifier", active, "createdAt", "updatedAt", "maintenanceThreshold") FROM stdin;
+1b607aec-d887-4586-b8ba-c52d28dbfcbe	testmachine	e8:e0:72:6b:92:a3	t	2019-11-06 18:37:58.727858	2019-11-06 18:37:58.727858	\N
+690c6ccc-c0b1-4a1c-92f1-2bd037132ddf	insomnia	nop	t	2019-11-07 13:28:01.983123	2019-11-07 13:28:01.983123	\N
+577d4eea-050c-406c-b300-5ebaaac3c9ea	fakemachine	e8:e0:72:6b:92:a3	f	2019-11-06 18:38:39.615769	2019-11-06 18:38:39.615769	25
 \.
 
 
@@ -156,3 +158,4 @@ ALTER TABLE ONLY public.coffee
 --
 -- PostgreSQL database dump complete
 --
+
