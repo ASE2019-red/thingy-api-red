@@ -27,6 +27,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./resources/init-postgres:/docker-entrypoint-initdb.d
+      - /etc/localtime:/etc/localtime:ro
     env_file: [.env]
 
   api:

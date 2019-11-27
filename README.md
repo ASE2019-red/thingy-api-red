@@ -2,22 +2,24 @@
 
 ## Setup
 
-Before starting the server, copy .env.example as .env and fill in the TODO fields 
+Before starting the server, copy .env.example as .env and fill in the TODO fields
 
 ## API
 
-### Draft API definition
+### API definition
 
-`/measurement/:name/` => Get all measurements of sensor   
+The definition of the API can be found in the [swagger.yaml](./swagger.yaml) file. If the API is running, this definition is displayed at its [root](http://localhost:8000/).
+
+`/measurement/:name/` => Get all measurements of sensor
 `/measurement/:name/?from=<date>&to=<date>` => Get measurement between timerange
 
-`/users/` => Get all users  
+`/users/` => Get all users
 `/users/:name` => Get specific user
 
 `/coffee_events/` => Get all coffee events (when was a coffee produced)
 
 ## Persistence
-The two database systems can be started for local development via `docker-compose`. The ports are published, which makes it possible to access the databases. 
+The two database systems can be started for local development via `docker-compose`. The ports are published, which makes it possible to access the databases.
 
 For the productive environment, the microservices are located in a common overlay network, which makes external access impossible.
 
@@ -27,7 +29,7 @@ To store simple relational data, this project uses PostgreSQL with [TypeORM](htt
 To run the database locally, do:
 
     $ docker-compose up -d postgres
-    
+
 To connect to the database, do:
 
     $ PGPASSWORD=mysecretpassword psql -h localhost thingy-db-red postgres

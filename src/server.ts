@@ -1,13 +1,22 @@
 import * as cors from '@koa/cors';
+import * as http from 'http';
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
+import {KoaSwaggerUiOptions} from 'koa2-swagger-ui';
 import {Connection} from 'typeorm';
 import {loadConfig} from './config';
+import MeasurementController from './controllers/measurement';
+import NotificationController from './controllers/notification';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
+import {Websocket, WebsocketFactory} from './websocket';
+
+type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middleware;
+// tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
+const koaSwagger = require('koa2-swagger-ui') as koa2SwaggerUiFunc;
 
 async function bootstrap() {
     try {
@@ -48,21 +57,40 @@ async function bootstrap() {
             ctx.set('X-Response-Time', `${ms}ms`);
         });
 
+        // Startup app
+        app.use(bodyParser());
+        app.use(routes);
+
+        const newServer: http.Server = http.createServer(app.callback());
+
+        const wsFactory: WebsocketFactory = WebsocketFactory.getInstance(newServer, app.context);
+        const liveGravityWs: Websocket = wsFactory.newSocket('/measurements/live/gravity');
+        liveGravityWs.broadcastInterval(MeasurementController.wsGetByTimeSlot, 1000);
+
+        const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
+        notificationsWs.broadcastInterval(NotificationController.wsNotify, 1000);
+        // Deliver swagger user interface
+        app.use(
+            koaSwagger({
+                routePrefix: '/',
+                swaggerOptions: {url: config.swaggerApiUrl},
+            }),
+        );
+
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
         app.context.mqtt = mqtt;
 
-        // Startup app
-        app.use(bodyParser());
-        app.use(routes);
-        const newServer = app.listen(config.port);
-        newServer.on('close', () => {
+        newServer.on('close', async () => {
             pg.close();
             mqtt.disconnect();
+            console.log(`Server closed`);
         });
 
-        console.log(`Server running on http://localhost:${config.port} 🚀`);
+        newServer.listen(config.port, () => {
+            console.log(`Server running on http://localhost:${config.port} 🚀`);
+        });
 
         return newServer;
 
