@@ -1,7 +1,7 @@
-import { ParameterizedContext } from 'koa';
-import { getManager } from 'typeorm';
-import { Coffee } from '../models/coffee';
-import { Machine } from '../models/machine';
+import {ParameterizedContext} from 'koa';
+import {getManager} from 'typeorm';
+import {Coffee} from '../models/coffee';
+import {Machine} from '../models/machine';
 import CoffeeDetector from '../service/coffeeDetector';
 
 export default class MachineController {
@@ -23,6 +23,7 @@ export default class MachineController {
         console.log(body);
         newMachine.name = body.name;
         newMachine.sensorIdentifier = body.sensorIdentifier;
+        newMachine.maintenanceThreshold = body.maintenanceThreshold;
         newMachine.active = true;
         try {
             const savedMachine = await MachineController.repository.save(newMachine);
@@ -54,14 +55,14 @@ export default class MachineController {
 
         if (machine) {
             let query = getManager().createQueryBuilder(Coffee, 'coffee')
-                .where('coffee.machine_id = :id', { id: ctx.params.id });
+                .where('coffee.machine_id = :id', {id: ctx.params.id});
 
             if (ctx.query.after) {
-                query = query.where('coffee.createdAt >= :date', { date: ctx.query.after });
+                query = query.where('coffee.createdAt >= :date', {date: ctx.query.after});
             }
 
             if (ctx.query.before) {
-                query = query.where('coffee.createdAt <= :date', { date: ctx.query.before });
+                query = query.where('coffee.createdAt <= :date', {date: ctx.query.before});
             }
 
             const coffees = await query.getMany();
