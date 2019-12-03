@@ -27,7 +27,7 @@ jobs:
         run: base=https://github.com/docker/machine/releases/download/v0.16.0 && curl -L $base/docker-machine-$(uname -s)-$(uname -m) > /tmp/docker-machine && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine && chmod +x /usr/local/bin/docker-machine
      
       - name: Create docker-machine for server
-        run: docker-machine create --driver none --url=tcp://51.15.233.22:2376 remoteDocker
+        run: docker-machine create --driver generic --generic-ip-address=51.15.233.22 --generic-ssh-user root --generic-ssh-key vps remoteDocker
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
 
