@@ -18,7 +18,7 @@ jobs:
           MQTT_PW: ${{ secrets.MQTT_PW }}
 
       - name: Prepare keys
-        run: $VPS_KEY > vps && $VPS_PUB_KEY > vps.pub
+        run: echo $VPS_KEY > vps && echo $VPS_PUB_KEY > vps.pub
         env:
           VPS_KEY: ${{ secrets.VPS_KEY }}
           VPS_PUB_KEY: ${{ secrets.VPS_PUB_KEY }}
