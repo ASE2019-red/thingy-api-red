@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test": "jest --runInBand",
+    "seed": "ts-node ./src/seeders/seed.ts",
     "unit-test": "jest 'unit'",
     "integration-test": "jest 'integration' --runInBand",
     "build-server": "tslint --project . && tsc",
