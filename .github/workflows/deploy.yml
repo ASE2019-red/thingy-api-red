@@ -27,6 +27,6 @@ jobs:
       - name: Deploy app with docker stack deploy using the production compose file
         run: docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
         env:
-          DOCKER_CA: 1
+          DOCKER_TLS_VERIFY: 1
           DOCKER_HOST: tcp://51.15.233.22:2376
           DOCKER_CERT_PATH=: $PWD
