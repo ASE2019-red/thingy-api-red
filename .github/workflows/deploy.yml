@@ -18,7 +18,7 @@ jobs:
           MQTT_PW: ${{ secrets.MQTT_PW }}
 
       - name: Prepare keys
-        run: echo $DOCKER_CA > ca.pem && echo $DOCKER_CERT && echo $DOCKER_KEY > key.pem
+        run: echo $DOCKER_CA > /ca.pem && echo $DOCKER_CERT > /cert.pem && echo $DOCKER_KEY > /key.pem
         env:
           DOCKER_CA: ${{ secrets.DOCKER_CA }}
           DOCKER_CERT: ${{ secrets.DOCKER_CERT }}
@@ -29,4 +29,4 @@ jobs:
         env:
           DOCKER_TLS_VERIFY: 1
           DOCKER_HOST: tcp://51.15.233.22:2376
-          DOCKER_CERT_PATH=: /
+          DOCKER_CERT_PATH: /
