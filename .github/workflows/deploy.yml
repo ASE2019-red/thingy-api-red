@@ -1,0 +1,38 @@
+name: "Deploy thingy-api-red"
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Prepare env variables
+        run: cp .env.example .env && echo MQTT_USER=$MQTT_USER >> .env && echo MQTT_PW=$MQTT_PW >> .env
+        env:
+          MQTT_USER: ${{ secrets.MQTT_USER }}
+          MQTT_PW: ${{ secrets.MQTT_PW }}
+
+      - name: Prepare keys
+        run: $VPS_KEY > vps && $VPS_PUB_KEY > vps.pub
+        env:
+          VPS_KEY: ${{ secrets.VPS_KEY }}
+          VPS_PUB_KEY: ${{ secrets.VPS_PUB_KEY }}
+
+      - name: Install docker-machine
+        run: base=https://github.com/docker/machine/releases/download/v0.16.0 && curl -L $base/docker-machine-$(uname -s)-$(uname -m) > /tmp/docker-machine && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine && chmod +x /usr/local/bin/docker-machine
+     
+      - name: Create docker-machine for server
+        run: docker-machine create --driver generic --generic-ip-address=$SERVER_IP --generic-ssh-user root --generic-ssh-key vps remoteDocker
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }
+
+      - name: Setup env to use docker remotely with docker-machine
+        run: eval $(docker-machine env remoteDocker)
+
+      - name: Deploy app with docker stack deploy using the production compose file
+        run: docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
