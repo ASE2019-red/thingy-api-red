@@ -29,4 +29,4 @@ jobs:
         env:
           DOCKER_TLS_VERIFY: 1
           DOCKER_HOST: tcp://51.15.233.22:2376
-          DOCKER_CERT_PATH=: $PWD
+          DOCKER_CERT_PATH=: /
