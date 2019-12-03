@@ -23,12 +23,10 @@ jobs:
           eval "$(ssh-agent -s)"
           ssh-add - <<< "${DEPLOY_KEY}"
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+          export DOCKER_HOST=ssh://root@51.15.233.22
+          docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
         env:
           DEPLOY_KEY: ${{ secrets.VPS_KEY }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
-
-      - name: Deploy app with docker stack deploy using the production compose file
-        run: export DOCKER_HOST=ssh://$DEPLOY_USER@$SERVER_IP && docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          
