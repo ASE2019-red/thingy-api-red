@@ -18,21 +18,13 @@ jobs:
           MQTT_PW: ${{ secrets.MQTT_PW }}
 
       - name: Prepare keys
-        run: echo $VPS_KEY > vps && echo $VPS_PUB_KEY > vps.pub
+        run: echo $VPS_KEY > ~/.ssh/id_rsa && echo $VPS_PUB_KEY > ~/.ssh/id_rsa.pub
         env:
           VPS_KEY: ${{ secrets.VPS_KEY }}
           VPS_PUB_KEY: ${{ secrets.VPS_PUB_KEY }}
 
-      - name: Install docker-machine
-        run: base=https://github.com/docker/machine/releases/download/v0.16.0 && curl -L $base/docker-machine-$(uname -s)-$(uname -m) > /tmp/docker-machine && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine && chmod +x /usr/local/bin/docker-machine
-     
-      - name: Create docker-machine for server
-        run: docker-machine create --driver generic --generic-ip-address=51.15.233.22 --generic-ssh-user root --generic-ssh-key vps remoteDocker
+      - name: Deploy app with docker stack deploy using the production compose file
+        run: export DOCKER_HOST=ssh://$DEPLOY_USER@$SERVER_IP && docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
-
-      - name: Setup env to use docker remotely with docker-machine
-        run: eval $(docker-machine env remoteDocker)
-
-      - name: Deploy app with docker stack deploy using the production compose file
-        run: docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
