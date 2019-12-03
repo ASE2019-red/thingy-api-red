@@ -29,7 +29,7 @@ jobs:
       - name: Create docker-machine for server
         run: docker-machine create --driver generic --generic-ip-address=$SERVER_IP --generic-ssh-user root --generic-ssh-key vps remoteDocker
         env:
-          SERVER_IP: ${{ secrets.SERVER_IP }
+          SERVER_IP: ${{ secrets.SERVER_IP }}
 
       - name: Setup env to use docker remotely with docker-machine
         run: eval $(docker-machine env remoteDocker)
