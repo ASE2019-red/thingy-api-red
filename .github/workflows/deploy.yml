@@ -17,6 +17,8 @@ jobs:
           MQTT_USER: ${{ secrets.MQTT_USER }}
           MQTT_PW: ${{ secrets.MQTT_PW }}
 
+      - run: apt-get update && apt-get install -y openssh-client
+
       - name: Prepare keys
         run: echo $VPS_KEY > ~/.ssh/id_rsa && echo $VPS_PUB_KEY > ~/.ssh/id_rsa.pub
         env:
