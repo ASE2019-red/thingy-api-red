@@ -18,15 +18,15 @@ jobs:
           MQTT_PW: ${{ secrets.MQTT_PW }}
 
       - name: Prepare keys
-        run: echo $DOCKER_CA > /ca.pem && echo $DOCKER_CERT > /cert.pem && echo $DOCKER_KEY > /key.pem
+        run: echo $DOCKER_CA > ca.pem && echo $DOCKER_CERT > cert.pem && echo $DOCKER_KEY > key.pem
         env:
           DOCKER_CA: ${{ secrets.DOCKER_CA }}
           DOCKER_CERT: ${{ secrets.DOCKER_CERT }}
           DOCKER_KEY: ${{ secrets.DOCKER_KEY }}
+      
 
       - name: Deploy app with docker stack deploy using the production compose file
-        run: docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
+        run: export DOCKER_CERT_PATH=$PWD && docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
         env:
           DOCKER_TLS_VERIFY: 1
           DOCKER_HOST: tcp://51.15.233.22:2376
-          DOCKER_CERT_PATH: /
