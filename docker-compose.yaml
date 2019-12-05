@@ -8,6 +8,7 @@ volumes:
   influx_data:
   postgres_data:
   api_data:
+  node-red-data:
 
 services:
   influx:
@@ -45,3 +46,12 @@ services:
     environment:
       INFLUXDB_HOST: influx
       POSTGRES_HOST: postgres
+
+  node-red:
+    image: nodered/node-red:latest
+    ports:
+      - 1880:1880
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - node-red-data
+    env_file: [.env]
