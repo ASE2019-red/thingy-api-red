@@ -67,7 +67,7 @@ export default class MachineController {
 
             const coffees = await query.getMany();
             ctx.status = 200;
-            ctx.body = coffees.length;
+            ctx.body = coffees;
         } else {
             ctx.status = 400;
             ctx.body = 'The machine you are trying to retrieve coffees for does not exist!';

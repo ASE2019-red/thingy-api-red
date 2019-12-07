@@ -6,6 +6,7 @@ Before starting the server, copy .env.example as .env and fill in the TODO field
 
 If you want to seed some test data run:
 ```
+docker-compose up -d postgres influx
 npm run seed
 ```
 

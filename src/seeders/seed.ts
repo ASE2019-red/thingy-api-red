@@ -1,5 +1,6 @@
 import {InfluxDB} from 'influx';
-import {Connection, getRepository} from 'typeorm';
+import * as moment from 'moment';
+import {Connection, getRepository, getConnection} from 'typeorm';
 import {loadConfig} from '../config';
 import { Coffee } from '../models/coffee';
 import { Machine } from '../models/machine';
@@ -19,10 +20,18 @@ async function createCoffees(machine: Machine, count: number) {
     for (let i = 0; i < count; i++) {
         const newCoffee = new Coffee();
         newCoffee.machine = machine;
+        newCoffee.createdAt = moment().subtract(1, 'month').toDate();
         coffees.push(newCoffee);
     }
 
-    return await getRepository(Coffee).save(coffees);
+    const coffeesAfterSave = await getRepository(Coffee).save(coffees);
+    const updatePromises = coffeesAfterSave.map(c => {
+        const randomDate = moment().subtract(Math.floor(Math.random() * 20), 'days').toISOString();
+        return getConnection().query(
+            `UPDATE coffee SET "createdAt" = '${randomDate}' WHERE id='${c.id}'`,
+        );
+    });
+    return await Promise.all(updatePromises);
 }
 
 async function createUser(name: string, email: string) {
@@ -63,8 +72,8 @@ async function seed() {
         const machine1 = await createMachine('Machine 1', config.mqtt.macThingy1);
         const machine2 = await createMachine('Machine 2', config.mqtt.macThingy2);
 
-        await createCoffees(machine1, 6);
-        await createCoffees(machine2, 4);
+        await createCoffees(machine1, 36);
+        await createCoffees(machine2, 24);
 
         await createUser('User 1', 'user1@testemail.test');
         await createUser('User 2', 'user2@testemail.test');
