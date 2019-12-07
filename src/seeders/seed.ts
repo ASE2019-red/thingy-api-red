@@ -1,6 +1,6 @@
 import {InfluxDB} from 'influx';
 import * as moment from 'moment';
-import {Connection, getRepository, getConnection} from 'typeorm';
+import {Connection, getConnection, getRepository} from 'typeorm';
 import {loadConfig} from '../config';
 import { Coffee } from '../models/coffee';
 import { Machine } from '../models/machine';
