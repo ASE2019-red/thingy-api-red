@@ -24,8 +24,8 @@ jobs:
           docker push ase2019red/thingy-api-red
           docker logout 
         env:
-          HUB_USER: ${{ secrets.HUB_PW }}
-          HUB_PW: ${{ secrets.HUB_USER }}
+          HUB_PW: ${{ secrets.HUB_PW }}
+          HUB_USER: ${{ secrets.HUB_USER }}
 
       - name: Prepare ssh agent
         run: |
