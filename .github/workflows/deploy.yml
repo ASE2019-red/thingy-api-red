@@ -1,0 +1,42 @@
+name: "Deploy thingy-api-red"
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Prepare env variables
+        run: cp .env.example .env && echo MQTT_USER=$MQTT_USER >> .env && echo MQTT_PW=$MQTT_PW >> .env
+        env:
+          MQTT_USER: ${{ secrets.MQTT_USER }}
+          MQTT_PW: ${{ secrets.MQTT_PW }}
+
+      - name: Build image
+        run: |
+          echo $HUB_PW | docker login --username $HUB_USER --password-stdin
+          docker build -t ase2019red/thingy-api-red . 
+          docker push ase2019red/thingy-api-red
+          docker logout 
+        env:
+          MQTT_USER: ${{ secrets.HUB_PW }}
+          MQTT_PW: ${{ secrets.HUB_USER }}
+
+      - name: Prepare ssh agent
+        run: |
+          mkdir -p ~/.ssh
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "${DEPLOY_KEY}"
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+          export DOCKER_HOST=ssh://root@51.15.233.22
+          docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
+        env:
+          DEPLOY_KEY: ${{ secrets.VPS_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          
