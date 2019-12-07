@@ -19,13 +19,13 @@ jobs:
 
       - name: Build image
         run: |
-          echo $HUB_PW | docker login --username $HUB_USER --password-stdin
+          echo $HUB_PW | docker login -u $HUB_USER --password-stdin
           docker build -t ase2019red/thingy-api-red . 
           docker push ase2019red/thingy-api-red
           docker logout 
         env:
-          MQTT_USER: ${{ secrets.HUB_PW }}
-          MQTT_PW: ${{ secrets.HUB_USER }}
+          HUB_USER: ${{ secrets.HUB_PW }}
+          HUB_PW: ${{ secrets.HUB_USER }}
 
       - name: Prepare ssh agent
         run: |
