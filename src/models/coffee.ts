@@ -13,10 +13,10 @@ export class Coffee {
     @PrimaryGeneratedColumn('uuid')
     public id: string;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamptz' })
     public createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ type: 'timestamptz' })
     public updatedAt: Date;
 
     @ManyToOne((type) => Machine, (machine) => machine.coffees)

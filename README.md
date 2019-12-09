@@ -2,22 +2,33 @@
 
 ## Setup
 
-Before starting the server, copy .env.example as .env and fill in the TODO fields 
+Before starting the server, copy .env.example as .env and fill in the TODO fields
+
+If you want to seed some test data run:
+
+    $ npm run seed
+
+To startup the application, run
+
+    $ npm run watch-server
+
+It's possible to startup the application stack with docker-compose:
+
+    $ docker-compuse up -d # Starts the three services postgres, influx and api
+
+### Production
+To use the docker-compose stack in production, run the following:
+
+    $ cd <data-dir-with-dotenv>
+    $ docker image pull ase2019red/thingy-api-red
+    $ docker-compose -f <path-to-compose-file> up -d
+
 
 ## API
-
-### Draft API definition
-
-`/measurement/:name/` => Get all measurements of sensor   
-`/measurement/:name/?from=<date>&to=<date>` => Get measurement between timerange
-
-`/users/` => Get all users  
-`/users/:name` => Get specific user
-
-`/coffee_events/` => Get all coffee events (when was a coffee produced)
+The definition of the API can be found in the [swagger.yaml](./swagger.yaml) file. If the API is running, this definition is displayed at its [root](http://localhost:8000/).
 
 ## Persistence
-The two database systems can be started for local development via `docker-compose`. The ports are published, which makes it possible to access the databases. 
+The two database systems can be started for local development via `docker-compose`. The ports are published, which makes it possible to access the databases.
 
 For the productive environment, the microservices are located in a common overlay network, which makes external access impossible.
 
@@ -27,7 +38,7 @@ To store simple relational data, this project uses PostgreSQL with [TypeORM](htt
 To run the database locally, do:
 
     $ docker-compose up -d postgres
-    
+
 To connect to the database, do:
 
     $ PGPASSWORD=mysecretpassword psql -h localhost thingy-db-red postgres

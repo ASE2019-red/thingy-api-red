@@ -27,14 +27,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./resources/init-postgres:/docker-entrypoint-initdb.d
+      - /etc/localtime:/etc/localtime:ro
     env_file: [.env]
 
   api:
-    image: thingy-api-red
+    image: ase2019red/thingy-api-red
     build: ./
     restart: on-failure
     ports:
-      - ${NODE_PORT}:8000
+      - 8000:8000
     volumes:
       - /etc/localtime:/etc/localtime:ro
     depends_on:
