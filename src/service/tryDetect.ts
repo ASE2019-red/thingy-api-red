@@ -1,13 +1,11 @@
 import { loadConfig } from '../config';
 import MQTTTopicClient from '../mqtt/client';
-import { KSGravityDetector } from './ksGravityDetector';
-import { FileDataRecorder } from './recorder/fileDataRecorder';
-import { gravityTransformer } from './thingy';
+import { VarianceGravityDetector } from './varianceDetector';
 
 const mqttClient = new MQTTTopicClient();
 const config = loadConfig();
 mqttClient.connect(config.mqtt);
 
-console.log('Starting recorder...');
+console.log('Starting detector...');
 
-const detector = new KSGravityDetector(config.mqtt.macThingy1, mqttClient);
+const detector = new VarianceGravityDetector(config.mqtt.macThingy1, mqttClient);
