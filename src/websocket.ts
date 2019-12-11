@@ -1,5 +1,6 @@
 import * as http from 'http';
 import {BaseContext, ExtendableContext} from 'koa';
+import * as querystring from 'querystring';
 import * as url from 'url';
 import * as WebSocket from 'ws';
 
@@ -30,16 +31,18 @@ class WebsocketFactory {
 class Websocket {
     private wss?: WebSocket.Server;
 
-    public constructor(private server: http.Server, private ctx: ExtendableContext, private path: string) {
+    public constructor(private server: http.Server,
+                       private ctx: ExtendableContext,
+                       private path: string,
+                       private params = {}) {
         this.wss = new WebSocket.Server({noServer: true});
-
         this.listen();
     }
 
     public async broadcast(callback: any) {
         for (const client of this.wss.clients) {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(await (callback(this.ctx)));
+                client.send(await (callback(this.ctx, this.params)));
             }
         }
     }
@@ -59,6 +62,7 @@ class Websocket {
             if (pathname === this.path) {
                 this.wss.handleUpgrade(request, socket, head, (ws) => {
                     this.wss.emit('connection', ws, request);
+                    this.params = querystring.parse(url.parse(request.url).query);
                 });
             }
         });
