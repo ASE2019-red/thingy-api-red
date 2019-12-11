@@ -30,18 +30,28 @@ export default class MeasurementController {
         }
     }
 
-    public static async wsGetByTimeSlot(ctx: ParameterizedContext) {
-        // await ctx.influx.writePoints([{measurement: 'gravity', tags: {name: 'ff-office'},
-        //      fields: {x: 1, y: 2, z: 3}}]);
-        // await sleep(1000);
-        // await ctx.influx.writePoints([{measurement: 'gravity', tags: {name: 'ff-office'},
-        //      fields: {x: 2, y: 6, z: 2}}]);
-        // await sleep(1000);
-        // await ctx.influx.writePoints([{measurement: 'gravity', tags: {name: 'ff-office'},
-        //      fields: {x: 3, y: 2, z: 1}}]);
+    public static async wsGetByTimeSlot(ctx: ParameterizedContext, params: any) {
+        /*await ctx.influx.writePoints([{
+            measurement: 'gravity', tags: {name: 'ff-office'},
+            fields: {x: 1, y: 2, z: 3},
+        }]);
+        await sleep(1000);
+        await ctx.influx.writePoints([{
+            measurement: 'gravity', tags: {name: 'ff-office'},
+            fields: {x: 2, y: 6, z: 2},
+        }]);
+        await sleep(1000);
+        await ctx.influx.writePoints([{
+            measurement: 'gravity', tags: {name: 'ff-office'},
+            fields: {x: 3, y: 2, z: 1},
+        }]);*/
 
-        // TODO: Time range selection
-        const result = await ctx.influx.query(`SELECT SUM(*) FROM gravity WHERE time > now() - 5m GROUP BY time(1m) fill(0)`);
+        let offset = '5m';
+        if (params['offset'] != null) {
+            offset = params['offset'];
+        }
+
+        const result = await ctx.influx.query(`SELECT SUM(*) FROM gravity WHERE time > now() - ${offset} GROUP BY time(1m) fill(0)`);
         return JSON.stringify(result);
     }
 }

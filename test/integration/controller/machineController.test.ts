@@ -92,7 +92,7 @@ describe('/machine without data', () => {
         test('GET /machine/:id/coffee', async () => {
             const response = await requestHelper.get(`/machine/${machine.id}/coffee`);
             expect(response.status).toEqual(200);
-            expect(response.body).toEqual(COFFEE_COUNT);
+            expect(response.body.length).toEqual(COFFEE_COUNT);
         });
 
     });

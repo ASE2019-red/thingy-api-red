@@ -12,8 +12,6 @@ volumes:
 services:
   influx:
     image: influxdb:1.7-alpine
-    ports:
-      - ${INFLUXDB_PORT}:8086
     volumes:
       - influx_data:/var/lib/influxdb
       - /resources/init-fluxdb:/docker-entrypoint-initdb.d
@@ -22,8 +20,6 @@ services:
 
   postgres:
     image: postgres:11-alpine
-    ports:
-      - ${POSTGRES_PORT}:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - /resources/init-postgres:/docker-entrypoint-initdb.d
@@ -43,3 +39,11 @@ services:
     environment:
       INFLUXDB_HOST: influx
       POSTGRES_HOST: postgres
+
+  frontend:
+    image: ase2019red/thingy-client-red
+    restart: on-failure
+    ports:
+      - 80:80
+    volumes:
+      - /etc/localtime:/etc/localtime:ro

@@ -5,14 +5,27 @@
 Before starting the server, copy .env.example as .env and fill in the TODO fields
 
 If you want to seed some test data run:
-```
-npm run seed
-```
+
+    $ docker-compose up -d postgres influx
+    $ npm run seed
+
+To startup the application, run
+
+    $ npm run watch-server
+
+It's possible to startup the application stack with docker-compose:
+
+    $ docker-compuse up -d # Starts the three services postgres, influx and api
+
+### Production
+To use the docker-compose stack in production, run the following:
+
+    $ cd <data-dir-with-dotenv>
+    $ docker image pull ase2019red/thingy-api-red
+    $ docker-compose -f <path-to-compose-file> up -d
+
 
 ## API
-
-### API definition
-
 The definition of the API can be found in the [swagger.yaml](./swagger.yaml) file. If the API is running, this definition is displayed at its [root](http://localhost:8000/).
 
 ## Persistence
