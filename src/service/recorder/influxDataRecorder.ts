@@ -8,20 +8,21 @@ export class InfluxDataRecorder extends DataRecorder {
 
     // simple limit for db writes
     private frameCount = 0;
-    private nthFrame = 50;
+    private stepSize = 2;
 
-    constructor(mqttClient: MQTTTopicClient, private influxClient: InfluxDB, protected device: any) {
-        super(mqttClient, device);
+    constructor(mqttClient: MQTTTopicClient, private influxClient: InfluxDB,
+                protected device: any, topic: string, stepSize?: number) {
+        super(mqttClient, device, topic);
+        if (stepSize) this.stepSize = stepSize;
     }
 
     public start(measurement: string, tags: any = {}, transformer: TransformerFn) {
         this.record = true;
-        this.mqttClient.onTopicMessage(this.topicDefinitions.gravity, (async (message: Buffer) => {
-            // FIXME: THIS is not accessible at callback execution time
-            // this.frameCount++;
-            // if (!this.isRecording() || this.frameCount % this.nthFrame != 0) {
-            //     return;
-            // }
+        this.mqttClient.onTopicMessage(this.topicDefinition, (async (message: Buffer) => {
+            this.frameCount++;
+            if (!this.isRecording() || this.frameCount % this.stepSize != 0) {
+                return;
+            }
             try {
                 const fields = transformer(message);
                 await this.influxClient.writePoints([{measurement, tags, fields}]);
@@ -29,10 +30,10 @@ export class InfluxDataRecorder extends DataRecorder {
                 console.error('Cannot write to InfluxDB');
                 console.error(e);
             }
-        }));
+        }).bind(this));
     }
 
-    public stop(measurement: string): void {
+    public stop(): void {
         this.record = false;
     }
 

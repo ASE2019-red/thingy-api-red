@@ -6,6 +6,7 @@ import * as bodyParser from 'koa-bodyparser';
 import {KoaSwaggerUiOptions} from 'koa2-swagger-ui';
 import {Connection} from 'typeorm';
 import {loadConfig} from './config';
+import CalibrationController from './controllers/calibration';
 import MeasurementController from './controllers/measurement';
 import NotificationController from './controllers/notification';
 import MQTTTopicClient from './mqtt/client';
@@ -69,6 +70,11 @@ async function bootstrap() {
 
         const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
         notificationsWs.broadcastInterval(NotificationController.wsNotify, 10000);
+
+        const calibrationWs: Websocket = wsFactory.newSocket('/machine/calibration');
+        const calibrationController: CalibrationController = new CalibrationController(mqtt, influx);
+        calibrationWs.wire(calibrationController);
+
         // Deliver swagger user interface
         app.use(
             koaSwagger({
