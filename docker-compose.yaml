@@ -15,9 +15,9 @@ services:
     ports:
       - ${INFLUXDB_PORT}:8086
     volumes:
-      - influx_data:/var/lib/influxdb
-      - ./resources/init-fluxdb:/docker-entrypoint-initdb.d
       - /etc/localtime:/etc/localtime:ro
+      - influx_data:/var/lib/influxdb
+      - ${PWD}/resources/init-fluxdb:/docker-entrypoint-initdb.d
     env_file: [.env]
 
   postgres:
@@ -25,9 +25,9 @@ services:
     ports:
       - ${POSTGRES_PORT}:5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./resources/init-postgres:/docker-entrypoint-initdb.d
       - /etc/localtime:/etc/localtime:ro
+      - postgres_data:/var/lib/postgresql/data
+      - ${PWD}/resources/init-postgres:/docker-entrypoint-initdb.d
     env_file: [.env]
 
   api:
@@ -45,3 +45,12 @@ services:
     environment:
       INFLUXDB_HOST: influx
       POSTGRES_HOST: postgres
+
+  node-red:
+    image: nodered/node-red:latest
+    ports:
+      - 1880:1880
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PWD}/resources/init-nodred/flows.json:/data/flows.json
+    env_file: [.env]

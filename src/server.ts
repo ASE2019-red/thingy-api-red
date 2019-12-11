@@ -68,7 +68,7 @@ async function bootstrap() {
         liveGravityWs.broadcastInterval(MeasurementController.wsGetByTimeSlot, 1000);
 
         const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
-        notificationsWs.broadcastInterval(NotificationController.wsNotify, 1000);
+        notificationsWs.broadcastInterval(NotificationController.wsNotify, 10000);
         // Deliver swagger user interface
         app.use(
             koaSwagger({
