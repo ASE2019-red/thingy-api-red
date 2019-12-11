@@ -14,7 +14,7 @@
     "method": "POST",
     "ret": "txt",
     "paytoqs": false,
-    "url": "https://hooks.slack.com/services/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",
+    "url": "$(NODE_RED_SLACK_WEBHOOK)",
     "tls": "",
     "persist": true,
     "proxy": "",
@@ -92,7 +92,7 @@
     "id": "bdbf6240.36049",
     "type": "websocket-client",
     "z": "",
-    "path": "ws://172.17.0.1:8000/notifications",
+    "path": "$(NODE_RED_WEBSOCKET_URL)",
     "tls": "",
     "wholemsg": "true"
   }
