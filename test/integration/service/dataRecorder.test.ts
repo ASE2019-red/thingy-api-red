@@ -42,8 +42,9 @@ beforeEach(async () => {
 });
 
 test('Add measurements', async () => {
-    const dataRecorder1: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy');
-    dataRecorder1.start(measurement, {}, fakeTransformer);
+    const dataRecorder1: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy',
+        'gravity', fakeTransformer, measurement, {}, 1);
+    dataRecorder1.start();
 
     // Send fake messages
     const publications = 3;
@@ -51,8 +52,9 @@ test('Add measurements', async () => {
         await mqtt.publish(dataRecorder1.topicDefinitions.gravity, 'fakeMessage');
     }
 
-    await dataRecorder1.stop(measurement);
-    await sleep(1000);
+    await sleep(500);
+    await dataRecorder1.stop();
+    await sleep(500);
 
     const rows = await influx.query(`select * from ${measurement}`);
     expect(rows.length).toBe(publications);
@@ -61,12 +63,14 @@ test('Add measurements', async () => {
 test('Query measurements by tag', async () => {
 
     const tags1 = {machine: 'ff-adrianos'};
-    const dataRecorder1: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy1');
-    dataRecorder1.start(measurement, tags1, fakeTransformer);
+    const dataRecorder1: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy1',
+        'gravity', fakeTransformer, measurement, tags1, 1);
+    dataRecorder1.start();
 
     const tags2 = {machine: 'another one'};
-    const dataRecorder2: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy2');
-    dataRecorder2.start(measurement, tags2, fakeTransformer);
+    const dataRecorder2: DataRecorder = new InfluxDataRecorder(mqtt, influx, 'fakeThingy2',
+        'gravity', fakeTransformer, measurement, tags2, 1);
+    dataRecorder2.start();
 
     // Send fake messages
     const publications = 3;
@@ -74,7 +78,9 @@ test('Query measurements by tag', async () => {
         await mqtt.publish(dataRecorder1.topicDefinitions.gravity, 'foo');
         await mqtt.publish(dataRecorder2.topicDefinitions.gravity, 'bar');
     }
-
+    await sleep(1000);
+    dataRecorder1.stop();
+    dataRecorder2.stop();
     await sleep(1000);
 
     const rows = await influx.query(`select * from ${measurement} where machine='${tags1.machine}'`);

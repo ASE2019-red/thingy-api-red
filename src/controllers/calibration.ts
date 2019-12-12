@@ -79,9 +79,11 @@ export default class CalibrationController implements WebsocketWiring {
         }
     }
     private startCalibration(machineId: string, sensorIdentifier: string): DataRecorder {
-        const recorder = new InfluxDataRecorder(this.mqtt, this.influx, sensorIdentifier, 'gravity');
         const measurement = `reference-${machineId}`;
-        recorder.start(measurement, {metric: 'gravity'}, gravityTransformerTagged);
+        const tags = {metric: 'gravity'};
+        const recorder = new InfluxDataRecorder(this.mqtt, this.influx, sensorIdentifier,
+            'gravity', gravityTransformerTagged, measurement, tags);
+        recorder.start();
         return recorder;
     }
 

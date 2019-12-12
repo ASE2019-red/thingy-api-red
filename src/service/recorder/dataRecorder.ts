@@ -17,7 +17,7 @@ export abstract class DataRecorder {
         }
     }
 
-    public abstract start(measurement: string, tags: any, transformer: TransformerFn): void;
+    public abstract start(measurement?: string, tags?: any, transformer?: TransformerFn): void;
 
     public abstract stop(measurement?: string): void;
 
