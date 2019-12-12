@@ -43,10 +43,8 @@ export class MQTTTopicClient extends EventEmitter {
      * Subscribe to the given topic.
      * @param topic the full topic definition.
      * @param listener the callback function to be invoked.
-     * Note that arrow functions will refer as this to
-     * the MQTTTopicClient object. If you need to keep the
-     * closure of the caller, the listener needs to be bound
-     * (and cannot be an arrow function).
+     * If you need to keep the closure of the caller,
+     * the listener needs to be bound or a arrow function.
      */
     public onTopicMessage(topic: string, listener: (message: Buffer) => void) {
         this.client.subscribe(topic).then((r) => {
