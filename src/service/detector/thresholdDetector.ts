@@ -2,9 +2,6 @@ import MQTTTopicClient from '../../mqtt/client';
 import Vector from '../stats/vector';
 import { DetectFn, Detector } from './detector';
 
-// Constants: We should probably fine tune them based on the
-// sensor and the coffee machine (maybe within some setup process for a new machine?)
-
 // Observed acceleration when there is no motion (only gravity)
 const NO_ADDITIONAL_ACCELERATION = new Vector(0, 0, 1000);
 

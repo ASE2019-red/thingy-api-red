@@ -2,10 +2,7 @@ import * as Router from 'koa-router';
 import CoffeeController from './controllers/coffee';
 import MachineController from './controllers/machine';
 import MeasurementController from './controllers/measurement';
-import NotificationController from './controllers/notification';
 import userController from './controllers/user';
-import {randomInt, sleep} from './util/util';
-import Websocket from './websocket';
 
 const router = new Router();
 
@@ -23,6 +20,10 @@ router.get('/machine/:id/coffee', MachineController.getMachineCoffees);
 router.get('/machine', MachineController.getMachines);
 router.get('/machine/:id', MachineController.getMachine);
 router.post('/machine', MachineController.createMachine);
+console.log('ENV is ' + process.env.NODE_ENV);
+if (process.env.NODE_ENV !== 'production') {
+    router.post('/machine/:id/coffee', MachineController.postMachineCoffee);
+}
 
 // User endpoint
 router.get('/users/:id', userController.getUser);
@@ -30,8 +31,5 @@ router.get('/users/:id', userController.getUser);
 // Measurement endpoint
 router.get('/measurements', MeasurementController.getAll);
 router.get('/measurements/:id', MeasurementController.getById);
-
-// notification endpoint
-router.get('/notifications/notifiers', NotificationController.getNotifiers);
 
 export const routes = router.routes();
