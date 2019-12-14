@@ -4,7 +4,7 @@ import { Machine } from '../models/machine';
 import { Websocket } from '../websocket';
 
 export function createOnCoffeeProduced(machine: Machine,
-    coffeeRepo: Repository<Coffee>,
+                                       coffeeRepo: Repository<Coffee>,
                                        notificationChannel: Websocket) {
 
     const onCoffeeProduced = async () => {
