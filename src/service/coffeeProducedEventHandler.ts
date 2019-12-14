@@ -4,10 +4,10 @@ import { Machine } from '../models/machine';
 import { Websocket } from '../websocket';
 
 export function createOnCoffeeProduced(machine: Machine,
+    coffeeRepo: Repository<Coffee>,
                                        notificationChannel: Websocket) {
 
     const onCoffeeProduced = async () => {
-        const coffeeRepo: Repository<Coffee> = getManager().getRepository(Coffee);
         const newCoffee = new Coffee();
         newCoffee.machine = machine;
         const savedCoffee = await coffeeRepo.save(newCoffee);

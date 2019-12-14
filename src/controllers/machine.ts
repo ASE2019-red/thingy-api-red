@@ -59,14 +59,14 @@ export default class MachineController {
 
         if (machine) {
             let query = getManager().createQueryBuilder(Coffee, 'coffee')
-                .where('coffee.machine_id = :id', {id: ctx.params.id});
+                .where('coffee.machine_id = :id', { id: ctx.params.id });
 
             if (ctx.query.after) {
-                query = query.where('coffee.createdAt >= :date', {date: ctx.query.after});
+                query = query.where('coffee.createdAt >= :date', { date: ctx.query.after });
             }
 
             if (ctx.query.before) {
-                query = query.where('coffee.createdAt <= :date', {date: ctx.query.before});
+                query = query.where('coffee.createdAt <= :date', { date: ctx.query.before });
             }
 
             const coffees = await query.getMany();
@@ -83,7 +83,8 @@ export default class MachineController {
         const machine = await MachineController.repository.findOne();
 
         if (machine) {
-            const onCoffeeProduced = createOnCoffeeProduced(machine, ctx.notificationsWs);
+            const onCoffeeProduced = createOnCoffeeProduced(machine, getManager().getRepository(Coffee),
+                                                            ctx.notificationsWs);
 
             await onCoffeeProduced();
             ctx.status = 200;
