@@ -3,8 +3,8 @@ import CoffeeController from './controllers/coffee';
 import MachineController from './controllers/machine';
 import MeasurementController from './controllers/measurement';
 import UserController from './controllers/user';
-import { jwt } from './middlewares/jwt';
 import AuthenticationController from './middlewares/authentication';
+import * as passport from "koa-passport";
 
 const router = new Router();
 
@@ -24,13 +24,12 @@ router.get('/machine/:id', MachineController.getMachine);
 router.post('/machine', MachineController.createMachine);
 
 // User endpoint
-router.get('/user', UserController.getUsers);
-router.get('/user/:id', UserController.getUser);
+router.get('/user', passport.authenticate("jwt", { session: false }), UserController.getUsers);
+router.get('/user/:id', passport.authenticate("jwt", { session: false }), UserController.getUser);
 router.post('/user', UserController.registerUser);
-router.post('/user/:id', UserController.updateUser);
+router.post('/user/:id', passport.authenticate("jwt", { session: false }), UserController.updateUser);
 router.post('/login', UserController.login);
-router.post('/logout/:id', UserController.logout);
-router.delete('/user/:id', UserController.deleteUser)
+router.delete('/user/:id', passport.authenticate("jwt", { session: false }), UserController.deleteUser)
 
 // Measurement endpoint
 router.get('/measurements', MeasurementController.getAll);

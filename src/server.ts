@@ -14,6 +14,11 @@ import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
 import { gravityTransformerTagged } from './service/thingy';
 import * as session from 'koa-session';
 import * as passport from 'koa-passport';
+import UserController from './controllers/user';
+import { User } from './models/user';
+const LocalStrategy = require("passport-local").Strategy;
+var JwtStrategy = require("passport-jwt").Strategy;
+var ExtractJwt = require("passport-jwt").ExtractJwt;
 
 
 async function bootstrap(samples: boolean) {
@@ -40,13 +45,30 @@ async function bootstrap(samples: boolean) {
         // cors
         app.use(cors());
 
-        // sessions
-        app.keys = ['Super secret session key 1', 'Another super secret session key 2'];
-        app.use(session(app));
-
+        const JWT_SECRET = "mysecret";
         // passport
+        let passport_options = {
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            secretOrKey: JWT_SECRET
+        }
+        passport.use(
+            "jwt",
+            new JwtStrategy(passport_options, (jwt_payload: any, done: any) => {
+                console.log("payload received", jwt_payload);
+                // CHECK IF THE USER IN THE JWT IS VALID
+                UserController.deserialize(jwt_payload.data.id)
+                    .then(user => {
+                        console.log("User:", user);
+                        if (user)
+                            return done(null, user);
+                        else
+                            return done(null, false);
+                    }).catch(error => {
+                        console.log(error);
+                    })
+            })
+        )
         app.use(passport.initialize());
-        app.use(passport.session())
 
         // Logger
         app.use(async (ctx, next) => {
