@@ -1,11 +1,10 @@
-import {getManager, Repository} from 'typeorm';
-import {Coffee} from '../models/coffee';
-import {Machine} from '../models/machine';
+import { getManager, Repository } from 'typeorm';
+import { Coffee } from '../models/coffee';
+import { Machine } from '../models/machine';
 import MQTTTopicClient from '../mqtt/client';
+import { Websocket } from '../websocket';
+import { createOnCoffeeProduced } from './coffeeProducedEventHandler';
 import Vector from './vector';
-
-// Constants: We should probably fine tune them based on the
-// sensor and the coffee machine (maybe within some setup process for a new machine?)
 
 // Observed acceleration when there is no motion (only gravity)
 const NO_ADDITIONAL_ACCELERATION = new Vector(0, 0, 1000);
@@ -25,24 +24,22 @@ const COFFE_PRODUCED_STOP_THRESHOLD = 4;
 
 class CoffeeDetector {
 
-    public static async createForAllMachines(accelerationTopic: string, mqttClient: MQTTTopicClient) {
+    public static async createForAllMachines(accelerationTopic: string,
+                                             notificationChannel: Websocket,
+                                             mqttClient: MQTTTopicClient) {
         CoffeeDetector.accelerationTopic = accelerationTopic;
         getManager().getRepository(Machine).find().then((machines: Machine[]) => {
             machines.forEach((machine: Machine) => {
-                CoffeeDetector.createForMachine(machine, mqttClient);
+                CoffeeDetector.createForMachine(machine, notificationChannel, mqttClient);
             });
         });
     }
 
     public static createForMachine(machine: Machine,
+                                   notificationChannel: Websocket,
                                    mqttClient: MQTTTopicClient) {
 
-        const onCoffeeProduced = () => {
-            const coffeeRepo: Repository<Coffee> = getManager().getRepository(Coffee);
-            const newCoffee = new Coffee();
-            newCoffee.machine = machine;
-            coffeeRepo.save(newCoffee);
-        };
+        const onCoffeeProduced = createOnCoffeeProduced(machine, notificationChannel);
 
         new CoffeeDetector(
             `${machine.sensorIdentifier}/${CoffeeDetector.accelerationTopic}`,

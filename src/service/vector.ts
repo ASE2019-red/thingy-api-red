@@ -1,7 +1,5 @@
-// todo: we could probably also just use a library,
-// if anyone knows a good and easy to use one
 /**
- * Simple immutable vector class
+ * Minimalistic immutable vector class
  */
 class Vector {
     public readonly x: number;

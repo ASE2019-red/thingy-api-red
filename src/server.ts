@@ -8,7 +8,6 @@ import {Connection} from 'typeorm';
 import {loadConfig} from './config';
 import CalibrationController from './controllers/calibration';
 import MeasurementController from './controllers/measurement';
-import NotificationController from './controllers/notification';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
@@ -30,8 +29,6 @@ async function bootstrap() {
         // Connect to MQTT broker
         const mqtt = new MQTTTopicClient();
         await mqtt.connect(config.mqtt);
-
-        await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
 
         // const dataRecorder: DataRecorder = new InfluxDataRecorder(mqtt, influx, config.mqtt.macThingy1);
         // dataRecorder.start('gravity', {location: 'test'}, gravityTransformerTagged);
@@ -69,7 +66,6 @@ async function bootstrap() {
         liveGravityWs.broadcastInterval(MeasurementController.wsGetByTimeSlot, 1000);
 
         const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
-        notificationsWs.broadcastInterval(NotificationController.wsNotify, 10000);
 
         const calibrationWs: Websocket = wsFactory.newSocket('/machine/calibration');
         const calibrationController: CalibrationController = new CalibrationController(mqtt, influx);
@@ -87,6 +83,9 @@ async function bootstrap() {
         app.context.influx = influx;
         app.context.pg = pg;
         app.context.mqtt = mqtt;
+        app.context.notificationsWs = notificationsWs;
+
+        await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, notificationsWs, mqtt);
 
         newServer.on('close', async () => {
             pg.close();

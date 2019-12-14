@@ -3,6 +3,7 @@ import {getManager} from 'typeorm';
 import {Coffee} from '../models/coffee';
 import {Machine} from '../models/machine';
 import CoffeeDetector from '../service/coffeeDetector';
+import { createOnCoffeeProduced } from '../service/coffeeProducedEventHandler';
 
 export default class MachineController {
 
@@ -28,7 +29,7 @@ export default class MachineController {
         newMachine.calibrated = false;
         try {
             const savedMachine = await MachineController.repository.save(newMachine);
-            CoffeeDetector.createForMachine(savedMachine, ctx.mqtt);
+            CoffeeDetector.createForMachine(savedMachine, ctx.notificationWs, ctx.mqtt);
 
             ctx.status = 201;
             ctx.body = savedMachine;
@@ -69,6 +70,22 @@ export default class MachineController {
             const coffees = await query.getMany();
             ctx.status = 200;
             ctx.body = coffees;
+        } else {
+            ctx.status = 400;
+            ctx.body = 'The machine you are trying to produce a test coffee for does not exist!';
+        }
+    }
+
+    // only for testing!
+    public static async postMachineCoffee(ctx: ParameterizedContext) {
+        const machine = await MachineController.repository.findOne();
+
+        if (machine) {
+            const onCoffeeProduced = createOnCoffeeProduced(machine, ctx.notificationsWs);
+
+            await onCoffeeProduced();
+            ctx.status = 200;
+            ctx.body = {};
         } else {
             ctx.status = 400;
             ctx.body = 'The machine you are trying to retrieve coffees for does not exist!';
