@@ -8,6 +8,7 @@ import {Connection} from 'typeorm';
 import {loadConfig} from './config';
 import CalibrationController from './controllers/calibration';
 import MeasurementController from './controllers/measurement';
+import { Coffee } from './models/coffee';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
