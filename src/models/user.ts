@@ -27,9 +27,9 @@ export class User {
     @Column('boolean')
     public active: boolean;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamptz' })
     public createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ type: 'timestamptz' })
     public updatedAt: Date;
 }

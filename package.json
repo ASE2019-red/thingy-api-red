@@ -5,8 +5,10 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "test": "jest 'unit'",
-    "integration-test": "jest 'integration'",
+    "test": "jest --runInBand",
+    "seed": "ts-node ./src/seeders/seed.ts",
+    "unit-test": "jest 'unit'",
+    "integration-test": "jest 'integration' --runInBand",
     "build-server": "tslint --project . && tsc",
     "watch-server": "nodemon --watch '{src,test}/**/*' -e ts,tsx --exec ts-node ./src/server.ts",
     "run-server": "ts-node ./src/server.ts"
@@ -23,6 +25,7 @@
     "@types/koa-session": "5.10.1",
     "@types/pg": "7.11.2",
     "@types/supertest": "2.0.8",
+    "@types/ws": "6.0.3",
     "async-mqtt": "2.4.2",
     "class-validator": "0.10.2",
     "dotenv": "8.2.0",
@@ -35,7 +38,8 @@
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
     "typeorm": "0.2.20",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "ws": "7.2.0"
   },
   "dependencies": {
     "@koa/cors": "2.2.3",
@@ -50,6 +54,8 @@
     "koa-session": "5.12.3",
     "passport-jwt": "4.0.0",
     "passport-local": "1.0.0",
-    "swagger-ui": "^3.24.3"
+    "swagger-ui": "^3.24.3",
+    "koa2-swagger-ui": "2.15.4",
+    "moment": "2.24.0"
   }
 }

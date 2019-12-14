@@ -1,13 +1,17 @@
 import * as mqtt from 'async-mqtt';
 import {AsyncMqttClient} from 'async-mqtt';
+import { EventEmitter } from 'events';
 
-export class MQTTTopicClient {
+export class MQTTTopicClient extends EventEmitter {
     private client?: AsyncMqttClient;
-    private topicMessageCallbacks = new Map<string, (message: Buffer) => void>();
+
+    constructor() {
+        super();
+        this.setMaxListeners(100);
+    }
 
     public async connect(config: {
         hostname: string, port: string, user: string, password: string,
-        macThingy1: string, macThingy2: string, macThingy3: string,
     }) {
         this.client = mqtt.connect({
             host: config.hostname,
@@ -27,9 +31,7 @@ export class MQTTTopicClient {
         });
 
         this.client.on('message', (topic: string, payload: Buffer) => {
-            if (this.topicMessageCallbacks.has(topic)) {
-                this.topicMessageCallbacks.get(topic)(payload);
-            }
+            this.emit(topic, payload);
         });
     }
 
@@ -37,9 +39,16 @@ export class MQTTTopicClient {
         await this.client.end();
     }
 
-    public onTopicMessage(topic: string, callback: (message: Buffer) => void) {
+    /**
+     * Subscribe to the given topic.
+     * @param topic the full topic definition.
+     * @param listener the callback function to be invoked.
+     * If you need to keep the closure of the caller,
+     * the listener needs to be bound or a arrow function.
+     */
+    public onTopicMessage(topic: string, listener: (message: Buffer) => void) {
         this.client.subscribe(topic).then((r) => {
-            this.topicMessageCallbacks.set(topic, callback);
+            this.addListener(topic, listener);
         });
     }
 

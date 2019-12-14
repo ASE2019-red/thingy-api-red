@@ -1,5 +1,6 @@
 import {ParameterizedContext} from 'koa';
 import {getManager} from 'typeorm';
+import {Coffee} from '../models/coffee';
 import {Machine} from '../models/machine';
 import CoffeeDetector from '../service/coffeeDetector';
 
@@ -22,15 +23,17 @@ export default class MachineController {
         console.log(body);
         newMachine.name = body.name;
         newMachine.sensorIdentifier = body.sensorIdentifier;
+        newMachine.maintenanceThreshold = body.maintenanceThreshold;
         newMachine.active = true;
+        newMachine.calibrated = false;
         try {
             const savedMachine = await MachineController.repository.save(newMachine);
             CoffeeDetector.createForMachine(savedMachine, ctx.mqtt);
 
-            ctx.status = 200;
+            ctx.status = 201;
             ctx.body = savedMachine;
         } catch {
-            ctx.status = 500;
+            ctx.status = 422;
             ctx.body = 'Saving the machine failed';
         }
 
@@ -49,15 +52,27 @@ export default class MachineController {
     }
 
     public static async getMachineCoffees(ctx: ParameterizedContext) {
-        const machine = await MachineController.repository.findOne(ctx.params.id, {relations: ['coffees']});
+        const machine = await MachineController.repository.findOne();
 
         if (machine) {
+            let query = getManager().createQueryBuilder(Coffee, 'coffee')
+                .where('coffee.machine_id = :id', {id: ctx.params.id});
+
+            if (ctx.query.after) {
+                query = query.where('coffee.createdAt >= :date', {date: ctx.query.after});
+            }
+
+            if (ctx.query.before) {
+                query = query.where('coffee.createdAt <= :date', {date: ctx.query.before});
+            }
+
+            const coffees = await query.getMany();
             ctx.status = 200;
-            ctx.body = machine.coffees.length;
-            console.log(machine.coffees);
+            ctx.body = coffees;
         } else {
             ctx.status = 400;
             ctx.body = 'The machine you are trying to retrieve coffees for does not exist!';
         }
     }
+
 }

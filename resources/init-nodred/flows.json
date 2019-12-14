@@ -1,0 +1,99 @@
+[
+  {
+    "id": "747fc612.93815",
+    "type": "tab",
+    "label": "Flow 1",
+    "disabled": false,
+    "info": ""
+  },
+  {
+    "id": "2a45d7da.6df18",
+    "type": "http request",
+    "z": "747fc612.93815",
+    "name": "Slack webhook",
+    "method": "POST",
+    "ret": "txt",
+    "paytoqs": false,
+    "url": "$(NODE_RED_SLACK_WEBHOOK)",
+    "tls": "",
+    "persist": true,
+    "proxy": "",
+    "authType": "",
+    "x": 880,
+    "y": 340,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "ef106078.bf41a",
+    "type": "function",
+    "z": "747fc612.93815",
+    "name": "Coffee is ready!",
+    "func": "msg.payload = {\n    \"attachments\": [\n        {\n            \"color\": \"#E22B1B\",\n            \"pretext\": \":coffee: is ready!\",\n            \"image_url\": msg.payload,\n        },\n    ],\n};\nmsg.headers = {'Content-Type':'application/json'};\nreturn msg;\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 660,
+    "y": 280,
+    "wires": [
+      [
+        "2a45d7da.6df18",
+        "630c6f60.e5b92"
+      ]
+    ]
+  },
+  {
+    "id": "630c6f60.e5b92",
+    "type": "debug",
+    "z": "747fc612.93815",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 870,
+    "y": 220,
+    "wires": []
+  },
+  {
+    "id": "5c1a1f8d.e6081",
+    "type": "websocket in",
+    "z": "747fc612.93815",
+    "name": "coffee notifier",
+    "server": "",
+    "client": "bdbf6240.36049",
+    "x": 330,
+    "y": 200,
+    "wires": [
+      [
+        "a332817d.d3607"
+      ]
+    ]
+  },
+  {
+    "id": "a332817d.d3607",
+    "type": "function",
+    "z": "747fc612.93815",
+    "name": "random GIF",
+    "func": "gifs=[\n    'https://i.imgur.com/yTtxUpj.gif',\n    'https://i.imgur.com/OZBjKgN.gif',\n    'https://i.imgur.com/WU3aqf6.gif',\n]\n\nmsg.payload=gifs[Math.floor(Math.random()*gifs.length)];\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 530,
+    "y": 200,
+    "wires": [
+      [
+        "ef106078.bf41a"
+      ]
+    ]
+  },
+  {
+    "id": "bdbf6240.36049",
+    "type": "websocket-client",
+    "z": "",
+    "path": "$(NODE_RED_WEBSOCKET_URL)",
+    "tls": "",
+    "wholemsg": "true"
+  }
+]

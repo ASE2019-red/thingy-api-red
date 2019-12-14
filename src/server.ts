@@ -1,10 +1,14 @@
 import * as cors from '@koa/cors';
+import * as http from 'http';
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
+import {KoaSwaggerUiOptions} from 'koa2-swagger-ui';
 import {Connection} from 'typeorm';
-import {qaRoutes} from '../test/integration/routes';
 import {loadConfig} from './config';
+import CalibrationController from './controllers/calibration';
+import MeasurementController from './controllers/measurement';
+import NotificationController from './controllers/notification';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
@@ -12,16 +16,17 @@ import CoffeeDetector from './service/coffeeDetector';
 import DataRecorder from './service/recorder/dataRecorder';
 import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
 import { gravityTransformerTagged } from './service/thingy';
-import * as session from 'koa-session';
 import * as passport from 'koa-passport';
 import UserController from './controllers/user';
-import { User } from './models/user';
-const LocalStrategy = require("passport-local").Strategy;
 var JwtStrategy = require("passport-jwt").Strategy;
 var ExtractJwt = require("passport-jwt").ExtractJwt;
+import {Websocket, WebsocketFactory} from './websocket';
 
+type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middleware;
+// tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
+const koaSwagger = require('koa2-swagger-ui') as koa2SwaggerUiFunc;
 
-async function bootstrap(samples: boolean) {
+async function bootstrap() {
     try {
         const config = loadConfig();
 
@@ -85,29 +90,53 @@ async function bootstrap(samples: boolean) {
             ctx.set('X-Response-Time', `${ms}ms`);
         });
 
-        // Only registry testdata routes if flag is set
-        if (samples) {
-            app.use(qaRoutes);
-        }
+        // Startup app
+        app.use(bodyParser());
+        app.use(routes);
+
+        const newServer: http.Server = http.createServer(app.callback());
+
+        const wsFactory: WebsocketFactory = WebsocketFactory.getInstance(newServer, app.context);
+        const liveGravityWs: Websocket = wsFactory.newSocket('/measurements/live/gravity');
+        liveGravityWs.broadcastInterval(MeasurementController.wsGetByTimeSlot, 1000);
+
+        const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
+        notificationsWs.broadcastInterval(NotificationController.wsNotify, 10000);
+
+        const calibrationWs: Websocket = wsFactory.newSocket('/machine/calibration');
+        const calibrationController: CalibrationController = new CalibrationController(mqtt, influx);
+        calibrationWs.wire(calibrationController);
+
+        // Deliver swagger user interface
+        app.use(
+            koaSwagger({
+                routePrefix: '/',
+                swaggerOptions: {url: config.swaggerApiUrl},
+            }),
+        );
 
         // Bind DB connections to context
         app.context.influx = influx;
         app.context.pg = pg;
         app.context.mqtt = mqtt;
 
-        // Startup app
-        app.use(bodyParser());
-        app.use(routes);
-        app.listen(config.port);
+        newServer.on('close', async () => {
+            pg.close();
+            mqtt.disconnect();
+            console.log(`Server closed`);
+        });
 
-        console.log(`Server running on http://localhost:${config.port} 🚀`);
+        newServer.listen(config.port, () => {
+            console.log(`Server running on http://localhost:${config.port} 🚀`);
+        });
 
-        return app;
+        return newServer;
 
     } catch (err) {
+        console.log(err);
         console.error(`Error occurred during startup. \n\t${err}`);
         process.exit(1);
     }
 }
 
-export const app = bootstrap(true);
+export const server = bootstrap();

@@ -5,6 +5,9 @@ import MeasurementController from './controllers/measurement';
 import UserController from './controllers/user';
 import AuthenticationController from './middlewares/authentication';
 import * as passport from "koa-passport";
+import NotificationController from './controllers/notification';
+import {randomInt, sleep} from './util/util';
+import Websocket from './websocket';
 
 const router = new Router();
 
@@ -34,5 +37,8 @@ router.delete('/user/:id', passport.authenticate("jwt", { session: false }), Use
 // Measurement endpoint
 router.get('/measurements', MeasurementController.getAll);
 router.get('/measurements/:id', MeasurementController.getById);
+
+// notification endpoint
+router.get('/notifications/notifiers', NotificationController.getNotifiers);
 
 export const routes = router.routes();
