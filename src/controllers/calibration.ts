@@ -1,6 +1,7 @@
 import { InfluxDB } from 'influx';
 import { getManager } from 'typeorm';
 import * as WebSocket from 'ws';
+import DetectorManager from '../service/detector/manager';
 import DataRecorder from '../service/recorder/dataRecorder';
 import { gravityTransformerTagged } from '../service/thingy';
 import { WebsocketWiring } from '../websocket';
@@ -17,7 +18,7 @@ export default class CalibrationController implements WebsocketWiring {
         return getManager().getRepository(Machine);
     }
 
-    constructor(private mqtt: MQTTTopicClient, private influx: InfluxDB) {}
+    constructor(private mqtt: MQTTTopicClient, private influx: InfluxDB, private detectors: DetectorManager) {}
 
     public addListeners(ws: WebSocket): void {
 
@@ -32,7 +33,7 @@ export default class CalibrationController implements WebsocketWiring {
             }
             machine = await CalibrationController.repository.findOne(data['id']);
             if (machine) {
-                recorder = this.startCalibration(machine.id, machine.sensorIdentifier);
+                recorder = this.startCalibration(machine);
 
                 const answer = {calibrating: true, limit: CalibrationController.timeLimit};
                 ws.send(JSON.stringify(answer));
@@ -75,13 +76,17 @@ export default class CalibrationController implements WebsocketWiring {
         if (!!recorder) recorder.stop();
         if (!!machine) {
             machine.calibrated = success;
-            await CalibrationController.repository.save(machine);
+            const savedMachine = await CalibrationController.repository.save(machine);
+            // attach detectors for this machine
+            this.detectors.createAll(savedMachine);
         }
     }
-    private startCalibration(machineId: string, sensorIdentifier: string): DataRecorder {
-        const measurement = `reference-${machineId}`;
+    private startCalibration(machine: Machine): DataRecorder {
+        // detach detector for this machine
+        this.detectors.removeAll(machine);
+        const measurement = `reference-${machine.id}`;
         const tags = {metric: 'gravity'};
-        const recorder = new InfluxDataRecorder(this.mqtt, this.influx, sensorIdentifier,
+        const recorder = new InfluxDataRecorder(this.mqtt, this.influx, machine.sensorIdentifier,
             'gravity', gravityTransformerTagged, measurement, tags);
         recorder.start();
         return recorder;

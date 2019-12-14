@@ -1,8 +1,6 @@
-import {getManager, Repository} from 'typeorm';
-import {Coffee} from '../models/coffee';
-import {Machine} from '../models/machine';
-import MQTTTopicClient from '../mqtt/client';
-import Vector from './vector';
+import MQTTTopicClient from '../../mqtt/client';
+import Vector from '../stats/vector';
+import { DetectFn, Detector } from './detector';
 
 // Constants: We should probably fine tune them based on the
 // sensor and the coffee machine (maybe within some setup process for a new machine?)
@@ -23,42 +21,13 @@ const COFFE_PRODUCED_MINIMAL_DURATION_THRESHOLD = 4;
 // than COFFE_PRODUCED_ACCELERATION_THRESHOLD such that we assumed the coffee is finished
 const COFFE_PRODUCED_STOP_THRESHOLD = 4;
 
-class CoffeeDetector {
+class ThresholdDetector extends Detector {
 
-    public static async createForAllMachines(accelerationTopic: string, mqttClient: MQTTTopicClient) {
-        CoffeeDetector.accelerationTopic = accelerationTopic;
-        getManager().getRepository(Machine).find().then((machines: Machine[]) => {
-            machines.forEach((machine: Machine) => {
-                CoffeeDetector.createForMachine(machine, mqttClient);
-            });
-        });
-    }
-
-    public static createForMachine(machine: Machine,
-                                   mqttClient: MQTTTopicClient) {
-
-        const onCoffeeProduced = () => {
-            const coffeeRepo: Repository<Coffee> = getManager().getRepository(Coffee);
-            const newCoffee = new Coffee();
-            newCoffee.machine = machine;
-            coffeeRepo.save(newCoffee);
-        };
-
-        new CoffeeDetector(
-            `${machine.sensorIdentifier}/${CoffeeDetector.accelerationTopic}`,
-            onCoffeeProduced,
-            mqttClient,
-        );
-    }
-
-    private static accelerationTopic: string;
-    private mqttClient: MQTTTopicClient;
     private averageWindow: number[] = [];
     private consecutiveWindowsAboveThreshold: number = 0;
     private coffeInProduction: boolean = false;
     // only added while a coffe is in production
     private windowsBelowThresholdAfterStart: number = 0;
-    private onCoffeeProduced: () => void;
 
     /**
      * @param accelerationSensorTopic: full string of the raw motion data topic
@@ -67,12 +36,16 @@ class CoffeeDetector {
      *        has registered that the coffee machine has finished producing a coffee
      * @param mqttClient
      */
-    constructor(accelerationSensorTopic: string,
-                onCoffeeProduced: () => void,
-                mqttClient: MQTTTopicClient) {
-        this.onCoffeeProduced = onCoffeeProduced;
-        this.mqttClient = mqttClient;
-        this.mqttClient.onTopicMessage(accelerationSensorTopic, this.receiveMotionData);
+    constructor(machineId: string,
+                sensorId: string,
+                mqtt: MQTTTopicClient,
+                onDetect: DetectFn) {
+        super(machineId, sensorId, mqtt, onDetect);
+        this.mqtt.onTopicMessage(this.definitions.acceleration, this.receiveMotionData);
+    }
+
+    public stop(): void {
+        this.mqtt.removeListener(this.definitions.acceleration, this.receiveMotionData);
     }
 
     public receiveMotionData = (rawData: Buffer) => {
@@ -109,7 +82,7 @@ class CoffeeDetector {
                 // below threshold for a longer time
                 // => coffee production is finished
                 if (this.stoppedProducingCoffee) {
-                    this.onCoffeeProduced();
+                    this.onDetect(this.machineId);
                     this.coffeInProduction = false;
                     this.windowsBelowThresholdAfterStart = 0;
                 }
@@ -127,4 +100,4 @@ class CoffeeDetector {
     }
 }
 
-export default CoffeeDetector;
+export default ThresholdDetector;

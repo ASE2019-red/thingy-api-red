@@ -2,7 +2,8 @@ import {ParameterizedContext} from 'koa';
 import {getManager} from 'typeorm';
 import {Coffee} from '../models/coffee';
 import {Machine} from '../models/machine';
-import CoffeeDetector from '../service/coffeeDetector';
+import ThresholdDetector from '../service/detector/thresholdDetector';
+import DetectorManager from '../service/detector/manager';
 
 export default class MachineController {
 
@@ -28,7 +29,8 @@ export default class MachineController {
         newMachine.calibrated = false;
         try {
             const savedMachine = await MachineController.repository.save(newMachine);
-            CoffeeDetector.createForMachine(savedMachine, ctx.mqtt);
+            const detectors: DetectorManager = ctx.detectors;
+            detectors.create(savedMachine, ThresholdDetector);
 
             ctx.status = 201;
             ctx.body = savedMachine;

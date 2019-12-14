@@ -7,8 +7,8 @@ export class FileDataRecorder extends DataRecorder {
     private recording = false;
     private frames: any[] = [];
 
-    constructor(mqttClient: MQTTTopicClient, protected device: any, private outfile: string) {
-        super(mqttClient, device);
+    constructor(mqttClient: MQTTTopicClient, device: any, topic: string, private outfile: string) {
+        super(mqttClient, device, topic);
     }
 
     public start(measurement: string, tags: any, transformer: TransformerFn): void {

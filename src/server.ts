@@ -12,8 +12,9 @@ import NotificationController from './controllers/notification';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
-import CoffeeDetector from './service/coffeeDetector';
+import CoffeeDetector from './service/detector/thresholdDetector';
 import {Websocket, WebsocketFactory} from './websocket';
+import DetectorManager from './service/detector/manager';
 
 type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middleware;
 // tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
@@ -30,11 +31,6 @@ async function bootstrap() {
         // Connect to MQTT broker
         const mqtt = new MQTTTopicClient();
         await mqtt.connect(config.mqtt);
-
-        await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, mqtt);
-
-        // const dataRecorder: DataRecorder = new InfluxDataRecorder(mqtt, influx, config.mqtt.macThingy1);
-        // dataRecorder.start('gravity', {location: 'test'}, gravityTransformerTagged);
 
         // Initialize the Koa application
         // tslint:disable-next-line:no-shadowed-variable
@@ -69,10 +65,14 @@ async function bootstrap() {
         liveGravityWs.broadcastInterval(MeasurementController.wsGetByTimeSlot, 1000);
 
         const notificationsWs: Websocket = wsFactory.newSocket('/notifications');
-        notificationsWs.broadcastInterval(NotificationController.wsNotify, 10000);
+        // notificationsWs.broadcastInterval(NotificationController.wsNotify, 10000);
+
+        // Initialize detectors for machines
+        const manager = new DetectorManager(mqtt, notificationsWs);
+        console.log('Successfully initialized detectors');
 
         const calibrationWs: Websocket = wsFactory.newSocket('/machine/calibration');
-        const calibrationController: CalibrationController = new CalibrationController(mqtt, influx);
+        const calibrationController: CalibrationController = new CalibrationController(mqtt, influx, manager);
         calibrationWs.wire(calibrationController);
 
         // Deliver swagger user interface
@@ -87,6 +87,7 @@ async function bootstrap() {
         app.context.influx = influx;
         app.context.pg = pg;
         app.context.mqtt = mqtt;
+        app.context.detectors = manager;
 
         newServer.on('close', async () => {
             pg.close();

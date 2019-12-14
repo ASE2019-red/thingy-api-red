@@ -2,24 +2,30 @@ import { createReadStream } from 'fs';
 //@ts-ignore
 import * as jstat from 'jstat';
 import { createInterface } from 'readline';
-import MQTTTopicClient from '../mqtt/client';
-import { MovingWindow } from './stats/movingWindow';
-import { gravityTransformer, TopicDefinitions, topicDefinitionsForDevice } from './thingy';
+import MQTTTopicClient from '../../mqtt/client';
+import { MovingWindow } from '../stats/movingWindow';
+import { gravityTransformer, TopicDefinitions, topicDefinitionsForDevice } from '../thingy';
+import { DetectFn, Detector } from './detector';
 
-export class VarianceGravityDetector {
-    private definitions: TopicDefinitions;
+export class VarianceGravityDetector extends Detector {
     private reference: MovingWindow;
     private window: MovingWindow;
     private ready: boolean = false;
     private yieldCnt: number = 0;
     private probabilityLimit = 0.55;
 
-    constructor(private device: string,
-                private mqttClient: MQTTTopicClient) {
-        this.definitions = topicDefinitionsForDevice(device);
-        this.mqttClient.onTopicMessage(this.definitions.gravity, this.onDataFrame);
+    constructor(machineId: string,
+                sensorId: string,
+                mqtt: MQTTTopicClient,
+                onDetect: DetectFn) {
+        super(machineId, sensorId, mqtt, onDetect);
+        this.mqtt.onTopicMessage(this.definitions.gravity, this.onDataFrame);
         this.reference = new MovingWindow(-1, 1.0);
         this.loadReference();
+    }
+
+    public stop(): void {
+        this.mqtt.removeListener(this.definitions.gravity, this.onDataFrame);
     }
 
     private onDataFrame = (rawData: Buffer) => {
@@ -66,6 +72,7 @@ export class VarianceGravityDetector {
         console.log(`p_x: ${p_x} p_y: ${p_y} p_z: ${p_z} mean: ${p_avg}`);
         if (p_avg >= this.probabilityLimit) {
             console.log('coffee produced!');
+            this.onDetect(this.machineId);
             this.yieldCnt = Math.round(this.reference.size() * 0.75);
         }
     }
