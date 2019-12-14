@@ -25,21 +25,23 @@ const COFFE_PRODUCED_STOP_THRESHOLD = 4;
 class CoffeeDetector {
 
     public static async createForAllMachines(accelerationTopic: string,
+                                             coffeeRepo: Repository<Coffee>,
                                              notificationChannel: Websocket,
                                              mqttClient: MQTTTopicClient) {
         CoffeeDetector.accelerationTopic = accelerationTopic;
         getManager().getRepository(Machine).find().then((machines: Machine[]) => {
             machines.forEach((machine: Machine) => {
-                CoffeeDetector.createForMachine(machine, notificationChannel, mqttClient);
+                CoffeeDetector.createForMachine(machine, coffeeRepo, notificationChannel, mqttClient);
             });
         });
     }
 
     public static createForMachine(machine: Machine,
+                                   coffeeRepo: Repository<Coffee>,
                                    notificationChannel: Websocket,
                                    mqttClient: MQTTTopicClient) {
 
-        const onCoffeeProduced = createOnCoffeeProduced(machine, notificationChannel);
+        const onCoffeeProduced = createOnCoffeeProduced(machine, coffeeRepo, notificationChannel);
 
         new CoffeeDetector(
             `${machine.sensorIdentifier}/${CoffeeDetector.accelerationTopic}`,

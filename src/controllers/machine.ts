@@ -1,7 +1,7 @@
-import {ParameterizedContext} from 'koa';
-import {getManager} from 'typeorm';
-import {Coffee} from '../models/coffee';
-import {Machine} from '../models/machine';
+import { ParameterizedContext } from 'koa';
+import { getManager } from 'typeorm';
+import { Coffee } from '../models/coffee';
+import { Machine } from '../models/machine';
 import CoffeeDetector from '../service/coffeeDetector';
 import { createOnCoffeeProduced } from '../service/coffeeProducedEventHandler';
 
@@ -29,7 +29,10 @@ export default class MachineController {
         newMachine.calibrated = false;
         try {
             const savedMachine = await MachineController.repository.save(newMachine);
-            CoffeeDetector.createForMachine(savedMachine, ctx.notificationWs, ctx.mqtt);
+            CoffeeDetector.createForMachine(savedMachine,
+                getManager().getRepository(Coffee),
+                ctx.notificationWs,
+                ctx.mqtt);
 
             ctx.status = 201;
             ctx.body = savedMachine;
@@ -57,14 +60,14 @@ export default class MachineController {
 
         if (machine) {
             let query = getManager().createQueryBuilder(Coffee, 'coffee')
-                .where('coffee.machine_id = :id', {id: ctx.params.id});
+                .where('coffee.machine_id = :id', { id: ctx.params.id });
 
             if (ctx.query.after) {
-                query = query.where('coffee.createdAt >= :date', {date: ctx.query.after});
+                query = query.where('coffee.createdAt >= :date', { date: ctx.query.after });
             }
 
             if (ctx.query.before) {
-                query = query.where('coffee.createdAt <= :date', {date: ctx.query.before});
+                query = query.where('coffee.createdAt <= :date', { date: ctx.query.before });
             }
 
             const coffees = await query.getMany();
@@ -81,7 +84,8 @@ export default class MachineController {
         const machine = await MachineController.repository.findOne();
 
         if (machine) {
-            const onCoffeeProduced = createOnCoffeeProduced(machine, ctx.notificationsWs);
+            const onCoffeeProduced = createOnCoffeeProduced(machine, getManager().getRepository(Coffee),
+                                                            ctx.notificationsWs);
 
             await onCoffeeProduced();
             ctx.status = 200;

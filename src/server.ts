@@ -13,6 +13,7 @@ import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
 import {Websocket, WebsocketFactory} from './websocket';
+import { Coffee } from './models/coffee';
 
 type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middleware;
 // tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
@@ -85,7 +86,11 @@ async function bootstrap() {
         app.context.mqtt = mqtt;
         app.context.notificationsWs = notificationsWs;
 
-        await CoffeeDetector.createForAllMachines(config.mqtt.accelerationTopic, notificationsWs, mqtt);
+        await CoffeeDetector.createForAllMachines(
+            config.mqtt.accelerationTopic,
+            pg.getRepository(Coffee),
+            notificationsWs,
+            mqtt);
 
         newServer.on('close', async () => {
             pg.close();
