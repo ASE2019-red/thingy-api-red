@@ -25,6 +25,7 @@ export default class MachineController {
         newMachine.sensorIdentifier = body.sensorIdentifier;
         newMachine.maintenanceThreshold = body.maintenanceThreshold;
         newMachine.active = true;
+        newMachine.calibrated = false;
         try {
             const savedMachine = await MachineController.repository.save(newMachine);
             CoffeeDetector.createForMachine(savedMachine, ctx.mqtt);

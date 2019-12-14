@@ -12,6 +12,7 @@ async function createMachine(name: string, sensorIdentifier: string) {
     newMachine.name = name;
     newMachine.sensorIdentifier = sensorIdentifier;
     newMachine.active = true;
+    newMachine.calibrated = false;
     return await getRepository(Machine).save(newMachine);
 }
 

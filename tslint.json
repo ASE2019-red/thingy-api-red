@@ -27,8 +27,8 @@
     "arrow-parens": false,
     "radix": false,
     "no-unused-expression": false,
-    "interface-name": false
+    "interface-name": false,
+    "curly": false
   },
-  "rulesDirectory": [],
-  "curly": false
+  "rulesDirectory": []
 }

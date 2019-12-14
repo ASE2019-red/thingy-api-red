@@ -38,4 +38,7 @@ export class Machine {
 
     @Column('integer', {nullable: true})
     public maintenanceThreshold?: number;
+
+    @Column('boolean', {nullable: true})
+    public calibrated: boolean;
 }

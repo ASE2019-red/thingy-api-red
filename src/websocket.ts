@@ -67,7 +67,17 @@ class Websocket {
             }
         });
     }
+
+    public wire(eventWiring: WebsocketWiring) {
+        this.wss.on('connection', (ws: WebSocket, req) => {
+            eventWiring.addListeners(ws);
+        });
+    }
 }
 
-export {Websocket, WebsocketFactory};
+interface WebsocketWiring {
+    addListeners(ws: WebSocket): void;
+}
+
+export {Websocket, WebsocketFactory, WebsocketWiring};
 export default WebsocketFactory;
