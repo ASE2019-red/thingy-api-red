@@ -25,6 +25,7 @@ export default class MachineController {
         newMachine.sensorIdentifier = body.sensorIdentifier;
         newMachine.maintenanceThreshold = body.maintenanceThreshold;
         newMachine.active = true;
+        newMachine.calibrated = false;
         try {
             const savedMachine = await MachineController.repository.save(newMachine);
             CoffeeDetector.createForMachine(savedMachine, ctx.mqtt);
@@ -67,7 +68,7 @@ export default class MachineController {
 
             const coffees = await query.getMany();
             ctx.status = 200;
-            ctx.body = coffees.length;
+            ctx.body = coffees;
         } else {
             ctx.status = 400;
             ctx.body = 'The machine you are trying to retrieve coffees for does not exist!';
