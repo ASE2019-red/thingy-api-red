@@ -43,7 +43,7 @@ class Websocket {
         for (const client of this.wss.clients) {
             if (client.readyState === WebSocket.OPEN) {
                 const data = await (callback(this.ctx, this.params));
-                console.log(`Send ${data}`);
+                console.log(`Broadcast data to clients.`);
                 client.send(data);
             }
         }

@@ -9,7 +9,10 @@ import { MovingWindow3d } from './../stats/movingWindow3d';
 import { DetectFn, Detector } from './detector';
 
 export class VarianceGravityDetector extends Detector {
+    // the reference window
     protected reference: MovingWindow3d;
+    // size of the moving window capturing frames
+    protected windowSize = 20;
     protected window: MovingWindow3d;
     protected ready: boolean = false;
     // seconds to backoff
@@ -17,7 +20,7 @@ export class VarianceGravityDetector extends Detector {
     protected wait = false;
     // mean probability to be reached for a detection event to trigger
     protected probabilityLimit = 0.50;
-    // number of consecutive tests above limit
+    // size of the consecutive tests window
     protected numTests = 5;
     protected consecutiveTests: MovingWindow1d;
     // test all stepSize frames
@@ -51,9 +54,7 @@ export class VarianceGravityDetector extends Detector {
             });
             console.log(`Reference for ${this.machineId} loaded.`);
             this.ready = true;
-            const windowSize = this.reference.size();
-            // this.yieldCnt = this.stepSize;
-            this.window = new MovingWindow3d(20);
+            this.window = new MovingWindow3d(this.windowSize);
         });
     }
 
@@ -70,8 +71,8 @@ export class VarianceGravityDetector extends Detector {
     private limiter(): boolean {
         this.frameCounter++;
         const doLimit = this.frameCounter % this.stepSize != 0
-            || this.wait;
-            // || this.window.size() < this.reference.size() * 0.2;
+            || this.wait
+            || this.window.size() == this.window.maxSize;
         if (!doLimit) this.frameCounter = 0;
         return doLimit;
     }
@@ -100,7 +101,7 @@ export class VarianceGravityDetector extends Detector {
             windowSum += num;
         });
         const mean = windowSum / this.consecutiveTests.maxSize;
-        console.log(`Mean of last ${this.numTests} tests: ${mean}`);
+        // console.log(`Mean of last ${this.numTests} tests: ${mean}`);
         if (mean >= this.probabilityLimit) {
             this.consecutiveTests.reset();
             console.log(`Coffee produced! Detector: ${this.constructor.name}`);
