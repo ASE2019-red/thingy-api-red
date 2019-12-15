@@ -12,12 +12,11 @@ import { InfluxDataRecorder } from './../service/recorder/influxDataRecorder';
 export default class CalibrationController implements WebsocketWiring {
 
     public static readonly CALIBRATION_MEASUREMENT = 'reference';
+    // limit calibration duration to x seconds
+    public static readonly TIME_LIMIT = 30;
     public static calibrationQuery(machineId: string) {
         return `select * from ${this.CALIBRATION_MEASUREMENT} where machine='${machineId}'`;
     }
-
-    // limit calibration duration to x seconds
-    public static timeLimit = 30;
 
     private static get repository() {
         return getManager().getRepository(Machine);
@@ -40,12 +39,12 @@ export default class CalibrationController implements WebsocketWiring {
             if (machine) {
                 recorder = this.startCalibration(machine);
 
-                const answer = {calibrating: true, limit: CalibrationController.timeLimit};
+                const answer = {calibrating: true, limit: CalibrationController.TIME_LIMIT};
                 ws.send(JSON.stringify(answer));
 
                 timeout = setTimeout(() => {
                     ws.close(1000, 'timeout');
-                }, CalibrationController.timeLimit * 1000);
+                }, CalibrationController.TIME_LIMIT * 1000);
 
             } else {
                 ws.close(1008, 'Machine does not exist.');

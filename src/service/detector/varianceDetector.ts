@@ -34,7 +34,7 @@ export class VarianceGravityDetector extends Detector {
     protected loadReference(): void {
         const query = CalibrationController.calibrationQuery(this.machineId);
         this.influx.query(query).then((results) => {
-            console.log(results);
+            console.log(`reference for ${this.machineId}: ${results}`);
         });
         // const readInterface = createInterface(
         //     createReadStream('reference.csv'));

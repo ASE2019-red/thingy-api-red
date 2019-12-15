@@ -3,23 +3,17 @@ import * as supertest from 'supertest';
 import { Coffee } from '../../../src/models/coffee';
 import { Machine } from '../../../src/models/machine';
 import { server } from '../../../src/server';
-import ThresholdDetector from '../../../src/service/detector/thresholdDetector';
 import { cleanAllTables, cleanTable, createTestCoffees, createTestData, createTestMachine } from '../integrationTestHelper';
-import DetectorManager from '../../../src/service/detector/manager';
 
 describe('/machine without data', () => {
     let requestHelper: any;
     let testServer: Server;
-    let mockCreateCoffeeDetector: any;
 
     beforeAll(async () => {
         testServer = await server;
         // important: Call after server to assure connection is up
         await cleanAllTables();
         requestHelper = supertest(testServer);
-        // mockCreateCoffeeDetector = jest.spyOn(DetectorManager, 'create').mockImplementation(
-        //     () => { return; },
-        // );
     });
 
     afterAll(async () => {
@@ -43,7 +37,7 @@ describe('/machine without data', () => {
         expect(response.body).toHaveProperty('sensorIdentifier', 'd1:d9:9f:36:cf:93');
         expect(response.body).toHaveProperty('createdAt');
         expect(response.body).toHaveProperty('active');
-        // expect(mockCreateCoffeeDetector).toBeCalledTimes(1);
+        expect(response.body).toHaveProperty('calibrated');
         await cleanTable(Machine, 'machine');
     });
 

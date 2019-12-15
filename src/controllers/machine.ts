@@ -2,9 +2,9 @@ import {ParameterizedContext} from 'koa';
 import {getManager} from 'typeorm';
 import {Coffee} from '../models/coffee';
 import {Machine} from '../models/machine';
+import { createOnCoffeeProduced } from '../service/coffeeProducedEventHandler';
 import DetectorManager from '../service/detector/manager';
 import ThresholdDetector from '../service/detector/thresholdDetector';
-import { createOnCoffeeProduced } from '../service/coffeeProducedEventHandler';
 
 export default class MachineController {
 

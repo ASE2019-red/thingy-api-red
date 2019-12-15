@@ -1,6 +1,7 @@
 import { InfluxDB } from 'influx';
 import { getManager, Repository } from 'typeorm';
 import { Websocket } from '../../websocket';
+import { createOnCoffeeProduced } from '../coffeeProducedEventHandler';
 import { Coffee } from './../../models/coffee';
 import { Machine } from './../../models/machine';
 import { MQTTTopicClient } from './../../mqtt/client';
@@ -24,21 +25,14 @@ export default class DetectorManager {
 
     public create(machine: Machine, type: string) {
 
+        const coffeeRepo: Repository<Coffee> = getManager().getRepository(Coffee);
+        const handler = createOnCoffeeProduced(machine, coffeeRepo, this.notificationWebsocket);
+
         const onCoffeeProduced = (machineId: string) => {
             const attachment = this.detectors.get(machineId);
             if (attachment.ignoreSignals) return;
 
-            // save coffee in db
-            const coffeeRepo: Repository<Coffee> = getManager().getRepository(Coffee);
-            const newCoffee = new Coffee();
-            newCoffee.machine = machine;
-            coffeeRepo.save(newCoffee);
-
-            // notify clients through websocket
-            this.notificationWebsocket.broadcast(() => {
-                const data = { coffeeProduced: machine.id };
-                return JSON.stringify(data);
-            });
+            handler();
 
             if (attachment.hasMany()) {
                 attachment.ignoreSignals = true;
