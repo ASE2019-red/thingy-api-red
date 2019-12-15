@@ -57,6 +57,7 @@ export default class DetectorManager {
     }
 
     public createAll(machine: Machine) {
+        if (!machine.active) return;
         this.create(machine, ThresholdDetector.name);
         if (machine.calibrated) {
             this.create(machine, VarianceGravityDetector.name);
@@ -78,6 +79,7 @@ export default class DetectorManager {
     private createForAllMachines() {
         getManager().getRepository(Machine).find().then((machines: Machine[]) => {
             machines.forEach((machine: Machine) => {
+                if (!machine.active) return;
                 this.create(machine, ThresholdDetector.name);
                 if (machine.calibrated) {
                     this.create(machine, VarianceGravityDetector.name);

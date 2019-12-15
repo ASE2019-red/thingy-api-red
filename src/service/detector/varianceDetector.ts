@@ -12,14 +12,14 @@ export class VarianceGravityDetector extends Detector {
     // the reference window
     protected reference: MovingWindow3d;
     // size of the moving window capturing frames
-    protected windowSize = 20;
+    protected windowSize = 25;
     protected window: MovingWindow3d;
     protected ready: boolean = false;
     // seconds to backoff
     protected backoffTime = 35;
     protected wait = false;
     // mean probability to be reached for a detection event to trigger
-    protected probabilityLimit = 0.50;
+    protected probabilityLimit = 0.60;
     // size of the consecutive tests window
     protected numTests = 5;
     protected consecutiveTests: MovingWindow1d;
@@ -72,7 +72,7 @@ export class VarianceGravityDetector extends Detector {
         this.frameCounter++;
         const doLimit = this.frameCounter % this.stepSize != 0
             || this.wait
-            || this.window.size() == this.window.maxSize;
+            || this.window.size() < this.window.maxSize;
         if (!doLimit) this.frameCounter = 0;
         return doLimit;
     }
