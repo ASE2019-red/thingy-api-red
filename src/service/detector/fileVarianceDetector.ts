@@ -1,7 +1,7 @@
 import { createReadStream } from 'fs';
 import { createInterface } from 'readline';
 import MQTTTopicClient from '../../mqtt/client';
-import { MovingWindow } from '../stats/movingWindow';
+import { MovingWindow } from '../stats/movingWindow3d';
 import { DetectFn } from './detector';
 import { VarianceGravityDetector } from './varianceDetector';
 

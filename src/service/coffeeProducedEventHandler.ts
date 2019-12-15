@@ -1,4 +1,5 @@
-import { getManager, Repository } from 'typeorm';
+import { ParameterizedContext } from 'koa';
+import { Repository } from 'typeorm';
 import { Coffee } from '../models/coffee';
 import { Machine } from '../models/machine';
 import { Websocket } from '../websocket';
@@ -11,7 +12,10 @@ export function createOnCoffeeProduced(machine: Machine,
         const newCoffee = new Coffee();
         newCoffee.machine = machine;
         const savedCoffee = await coffeeRepo.save(newCoffee);
-        notificationChannel.broadcast(() => JSON.stringify(savedCoffee));
+        const notify = async (ctx: ParameterizedContext, params: any) => {
+            return JSON.stringify(savedCoffee);
+        };
+        notificationChannel.broadcast(notify);
     };
 
     return onCoffeeProduced;

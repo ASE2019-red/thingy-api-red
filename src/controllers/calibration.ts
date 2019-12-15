@@ -37,7 +37,7 @@ export default class CalibrationController implements WebsocketWiring {
             }
             machine = await CalibrationController.repository.findOne(data['id']);
             if (machine) {
-                recorder = this.startCalibration(machine);
+                recorder = await this.startCalibration(machine);
 
                 const answer = {calibrating: true, limit: CalibrationController.TIME_LIMIT};
                 ws.send(JSON.stringify(answer));
@@ -85,9 +85,14 @@ export default class CalibrationController implements WebsocketWiring {
             this.detectors.createAll(savedMachine);
         }
     }
-    private startCalibration(machine: Machine): DataRecorder {
+    private async startCalibration(machine: Machine): Promise<DataRecorder> {
         // detach detector for this machine
         this.detectors.removeAll(machine);
+        // drop reference series
+        await this.influx.dropSeries({
+            measurement: m => m.name(CalibrationController.CALIBRATION_MEASUREMENT),
+            where: w => w.tag('machine').equals.value(machine.id),
+        });
         const tags = {machine: machine.id, metric: 'gravity'};
         const recorder = new InfluxDataRecorder(this.mqtt, this.influx, machine.sensorIdentifier,
             'gravity', gravityTransformerTagged, CalibrationController.CALIBRATION_MEASUREMENT, tags);

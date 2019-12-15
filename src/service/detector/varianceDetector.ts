@@ -1,20 +1,28 @@
-import { createReadStream } from 'fs';
-import { InfluxDB, IResults } from 'influx';
+import { InfluxDB } from 'influx';
 //@ts-ignore
 import * as jstat from 'jstat';
-import { createInterface } from 'readline';
 import CalibrationController from '../../controllers/calibration';
 import MQTTTopicClient from '../../mqtt/client';
-import { MovingWindow } from '../stats/movingWindow';
-import { gravityTransformer, TopicDefinitions, topicDefinitionsForDevice } from '../thingy';
+import { gravityTransformer } from '../thingy';
+import { MovingWindow1d } from './../stats/movingWindow1d';
+import { MovingWindow3d } from './../stats/movingWindow3d';
 import { DetectFn, Detector } from './detector';
 
 export class VarianceGravityDetector extends Detector {
-    protected reference: MovingWindow;
-    protected window: MovingWindow;
+    protected reference: MovingWindow3d;
+    protected window: MovingWindow3d;
     protected ready: boolean = false;
-    protected yieldCnt: number = 0;
-    protected probabilityLimit = 0.55;
+    // seconds to backoff
+    protected backoffTime = 35;
+    protected wait = false;
+    // mean probability to be reached for a detection event to trigger
+    protected probabilityLimit = 0.50;
+    // number of consecutive tests above limit
+    protected numTests = 5;
+    protected consecutiveTests: MovingWindow1d;
+    // test all stepSize frames
+    protected stepSize = 10;
+    protected frameCounter = 0;
 
     constructor(machineId: string,
                 sensorId: string,
@@ -23,7 +31,8 @@ export class VarianceGravityDetector extends Detector {
                 private influx: InfluxDB) {
         super(machineId, sensorId, mqtt, onDetect);
         this.mqtt.onTopicMessage(this.definitions.gravity, this.onDataFrame);
-        this.reference = new MovingWindow(-1, 1.0);
+        this.reference = new MovingWindow3d(-1);
+        this.consecutiveTests = new MovingWindow1d(this.numTests);
         this.loadReference();
     }
 
@@ -34,36 +43,44 @@ export class VarianceGravityDetector extends Detector {
     protected loadReference(): void {
         const query = CalibrationController.calibrationQuery(this.machineId);
         this.influx.query(query).then((results) => {
-            console.log(`reference for ${this.machineId}: ${results}`);
+            results.forEach((r: any) => {
+                const x = r.x;
+                const y = r.y;
+                const z = r.z;
+                this.reference.push([x, y, z]);
+            });
+            console.log(`Reference for ${this.machineId} loaded.`);
+            this.ready = true;
+            const windowSize = this.reference.size();
+            // this.yieldCnt = this.stepSize;
+            this.window = new MovingWindow3d(20);
         });
-        // const readInterface = createInterface(
-        //     createReadStream('reference.csv'));
-        // readInterface.on('line', (line) => {
-        //     const arr = line.split(', ');
-        //     const x = parseFloat(arr[0]);
-        //     const y = parseFloat(arr[1]);
-        //     const z = parseFloat(arr[2]);
-        //     this.reference.push([x, y, z]);
-        // });
-        // readInterface.on('close', () => {
-        //     console.log('file read');
-        //     this.ready = true;
-        //     const frameSize = this.reference.size();
-        //     this.yieldCnt = frameSize;
-        //     this.window = new MovingWindow(frameSize);
-        // });
     }
 
     private onDataFrame = (rawData: Buffer) => {
         const vector = gravityTransformer(rawData);
         if (this.ready) {
             this.window.push(vector);
-            if (this.yieldCnt <= 0) {
+            if (!this.limiter()) {
                 this.test();
-            } else {
-                this.yieldCnt--;
             }
         }
+    }
+
+    private limiter(): boolean {
+        this.frameCounter++;
+        const doLimit = this.frameCounter % this.stepSize != 0
+            || this.wait;
+            // || this.window.size() < this.reference.size() * 0.2;
+        if (!doLimit) this.frameCounter = 0;
+        return doLimit;
+    }
+
+    private backoff(): void {
+        this.wait = true;
+        setTimeout(() => {
+            this.wait = false;
+        }, this.backoffTime * 1000);
     }
 
     /**
@@ -76,11 +93,19 @@ export class VarianceGravityDetector extends Detector {
         const p_y = jstat.anovaftest(this.reference.y, this.window.y);
         const p_z = jstat.anovaftest(this.reference.z, this.window.z);
         const p_avg = (p_x + p_y + p_z) / 3;
-        console.log(`p_x: ${p_x} p_y: ${p_y} p_z: ${p_z} mean: ${p_avg}`);
-        if (p_avg >= this.probabilityLimit) {
-            console.log('coffee produced!');
+        // console.log(`p_x: ${p_x} p_y: ${p_y} p_z: ${p_z} mean: ${p_avg}`);
+        this.consecutiveTests.push(p_avg);
+        let windowSum = 0;
+        this.consecutiveTests.elements.forEach(num => {
+            windowSum += num;
+        });
+        const mean = windowSum / this.consecutiveTests.maxSize;
+        console.log(`Mean of last ${this.numTests} tests: ${mean}`);
+        if (mean >= this.probabilityLimit) {
+            this.consecutiveTests.reset();
+            console.log(`Coffee produced! Detector: ${this.constructor.name}`);
             this.onDetect(this.machineId);
-            this.yieldCnt = Math.round(this.reference.size() * 0.75);
+            this.backoff();
         }
     }
 

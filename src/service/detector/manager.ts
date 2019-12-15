@@ -11,7 +11,7 @@ import { VarianceGravityDetector } from './varianceDetector';
 
 // number of seconds signals from detectors are ignored
 // when multiple detectors are attached to a machine.
-const IGNORE_SIGNALS_TIME = 15;
+const IGNORE_SIGNALS_TIME = 30;
 
 export default class DetectorManager {
 
@@ -38,6 +38,7 @@ export default class DetectorManager {
                 attachment.ignoreSignals = true;
                 setTimeout(() => {
                     attachment.ignoreSignals = false;
+                    console.log(`Reset detection signal back-off for machine: ${machineId}`);
                 }, IGNORE_SIGNALS_TIME * 1000);
             }
 
