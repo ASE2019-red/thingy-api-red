@@ -1,5 +1,5 @@
 import { InfluxDB } from 'influx';
-//@ts-ignore
+// @ts-ignore
 import * as jstat from 'jstat';
 import CalibrationController from '../../controllers/calibration';
 import MQTTTopicClient from '../../mqtt/client';
@@ -90,12 +90,12 @@ export class VarianceGravityDetector extends Detector {
      * probability, a coffee is detected.
      */
     private test(): void {
-        const p_x = jstat.anovaftest(this.reference.x, this.window.x);
-        const p_y = jstat.anovaftest(this.reference.y, this.window.y);
-        const p_z = jstat.anovaftest(this.reference.z, this.window.z);
-        const p_avg = (p_x + p_y + p_z) / 3;
+        const px = jstat.anovaftest(this.reference.x, this.window.x);
+        const py = jstat.anovaftest(this.reference.y, this.window.y);
+        const pz = jstat.anovaftest(this.reference.z, this.window.z);
+        const pavg = (px + py + pz) / 3;
         // console.log(`p_x: ${p_x} p_y: ${p_y} p_z: ${p_z} mean: ${p_avg}`);
-        this.consecutiveTests.push(p_avg);
+        this.consecutiveTests.push(pavg);
         let windowSum = 0;
         this.consecutiveTests.elements.forEach(num => {
             windowSum += num;

@@ -1,7 +1,7 @@
+import { writeFileSync } from 'fs';
 import { MQTTTopicClient } from '../../mqtt/client';
 import { TransformerFn } from '../thingy';
 import { DataRecorder } from './dataRecorder';
-import { writeFileSync } from 'fs';
 
 export class FileDataRecorder extends DataRecorder {
     private recording = false;
