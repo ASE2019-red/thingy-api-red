@@ -1,23 +1,26 @@
 import { createReadStream } from 'fs';
+import { InfluxDB, IResults } from 'influx';
 //@ts-ignore
 import * as jstat from 'jstat';
 import { createInterface } from 'readline';
+import CalibrationController from '../../controllers/calibration';
 import MQTTTopicClient from '../../mqtt/client';
 import { MovingWindow } from '../stats/movingWindow';
 import { gravityTransformer, TopicDefinitions, topicDefinitionsForDevice } from '../thingy';
 import { DetectFn, Detector } from './detector';
 
 export class VarianceGravityDetector extends Detector {
-    private reference: MovingWindow;
-    private window: MovingWindow;
-    private ready: boolean = false;
-    private yieldCnt: number = 0;
-    private probabilityLimit = 0.55;
+    protected reference: MovingWindow;
+    protected window: MovingWindow;
+    protected ready: boolean = false;
+    protected yieldCnt: number = 0;
+    protected probabilityLimit = 0.55;
 
     constructor(machineId: string,
                 sensorId: string,
                 mqtt: MQTTTopicClient,
-                onDetect: DetectFn) {
+                onDetect: DetectFn,
+                private influx: InfluxDB) {
         super(machineId, sensorId, mqtt, onDetect);
         this.mqtt.onTopicMessage(this.definitions.gravity, this.onDataFrame);
         this.reference = new MovingWindow(-1, 1.0);
@@ -26,6 +29,29 @@ export class VarianceGravityDetector extends Detector {
 
     public stop(): void {
         this.mqtt.removeListener(this.definitions.gravity, this.onDataFrame);
+    }
+
+    protected loadReference(): void {
+        const query = CalibrationController.calibrationQuery(this.machineId);
+        this.influx.query(query).then((results) => {
+            console.log(results);
+        });
+        // const readInterface = createInterface(
+        //     createReadStream('reference.csv'));
+        // readInterface.on('line', (line) => {
+        //     const arr = line.split(', ');
+        //     const x = parseFloat(arr[0]);
+        //     const y = parseFloat(arr[1]);
+        //     const z = parseFloat(arr[2]);
+        //     this.reference.push([x, y, z]);
+        // });
+        // readInterface.on('close', () => {
+        //     console.log('file read');
+        //     this.ready = true;
+        //     const frameSize = this.reference.size();
+        //     this.yieldCnt = frameSize;
+        //     this.window = new MovingWindow(frameSize);
+        // });
     }
 
     private onDataFrame = (rawData: Buffer) => {
@@ -38,25 +64,6 @@ export class VarianceGravityDetector extends Detector {
                 this.yieldCnt--;
             }
         }
-    }
-
-    private loadReference(): void {
-        const readInterface = createInterface(
-            createReadStream('reference.csv'));
-        readInterface.on('line', (line) => {
-            const arr = line.split(', ');
-            const x = parseFloat(arr[0]);
-            const y = parseFloat(arr[1]);
-            const z = parseFloat(arr[2]);
-            this.reference.push([x, y, z]);
-        });
-        readInterface.on('close', () => {
-            console.log('file read');
-            this.ready = true;
-            const frameSize = this.reference.size();
-            this.yieldCnt = frameSize;
-            this.window = new MovingWindow(frameSize);
-        });
     }
 
     /**

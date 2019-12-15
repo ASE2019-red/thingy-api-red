@@ -1,9 +1,10 @@
+import { InfluxDB } from 'influx';
 import { getManager, Repository } from 'typeorm';
 import { Websocket } from '../../websocket';
 import { Coffee } from './../../models/coffee';
 import { Machine } from './../../models/machine';
 import { MQTTTopicClient } from './../../mqtt/client';
-import { Detector } from './detector';
+import { DetectFn, Detector } from './detector';
 import ThresholdDetector from './thresholdDetector';
 import { VarianceGravityDetector } from './varianceDetector';
 
@@ -15,12 +16,13 @@ export default class DetectorManager {
 
     private readonly detectors: Map<string, Attachment>;
 
-    constructor(private mqtt: MQTTTopicClient, private notificationWebsocket: Websocket) {
+    constructor(private mqtt: MQTTTopicClient, private influx: InfluxDB,
+                private notificationWebsocket: Websocket) {
         this.detectors = new Map<string, Attachment>();
         this.createForAllMachines();
     }
 
-    public create(machine: Machine, ctor: new(...args: any) => Detector, ...more: any) {
+    public create(machine: Machine, type: string) {
 
         const onCoffeeProduced = (machineId: string) => {
             const attachment = this.detectors.get(machineId);
@@ -47,7 +49,7 @@ export default class DetectorManager {
 
         };
 
-        const detector = new ctor(machine.id, machine.sensorIdentifier, this.mqtt, onCoffeeProduced, more);
+        const detector = this.factory(machine, onCoffeeProduced, type);
         const machineDetectors = this.detectors.get(machine.id);
         if (!!machineDetectors) {
             machineDetectors.attach(detector);
@@ -60,13 +62,13 @@ export default class DetectorManager {
     }
 
     public createAll(machine: Machine) {
-        this.create(machine, ThresholdDetector);
+        this.create(machine, ThresholdDetector.name);
         if (machine.calibrated) {
-            this.create(machine, VarianceGravityDetector);
+            this.create(machine, VarianceGravityDetector.name);
         }
     }
 
-    public remove(machine: Machine, detector: typeof Detector) {
+    public remove(machine: Machine, detector: string) {
         const machineDetectors = this.detectors.get(machine.id);
         if (!!machineDetectors) {
             machineDetectors.detach(detector);
@@ -74,19 +76,27 @@ export default class DetectorManager {
     }
 
     public removeAll(machine: Machine) {
-        this.remove(machine, ThresholdDetector);
-        this.remove(machine, VarianceGravityDetector);
+        this.remove(machine, ThresholdDetector.name);
+        this.remove(machine, VarianceGravityDetector.name);
     }
 
     private createForAllMachines() {
         getManager().getRepository(Machine).find().then((machines: Machine[]) => {
             machines.forEach((machine: Machine) => {
-                this.create(machine, ThresholdDetector);
+                this.create(machine, ThresholdDetector.name);
                 if (machine.calibrated) {
-                    this.create(machine, VarianceGravityDetector);
+                    this.create(machine, VarianceGravityDetector.name);
                 }
             });
         });
+    }
+
+    private factory(machine: Machine, onDetect: DetectFn, type: string): Detector {
+        if (type === VarianceGravityDetector.name) {
+            return new VarianceGravityDetector(machine.id, machine.sensorIdentifier, this.mqtt, onDetect, this.influx);
+        } else {
+            return new ThresholdDetector(machine.id, machine.sensorIdentifier, this.mqtt, onDetect);
+        }
     }
 }
 
@@ -106,10 +116,10 @@ class Attachment {
         this.detectors.set(detector.constructor.name, detector);
     }
 
-    public detach(detector: typeof Detector) {
-        const attached = this.detectors.get(detector.name);
+    public detach(detector: string) {
+        const attached = this.detectors.get(detector);
         if (attached) attached.stop();
-        this.detectors.delete(detector.name);
+        this.detectors.delete(detector);
     }
 
     public hasMany(): boolean {

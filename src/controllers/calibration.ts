@@ -11,6 +11,11 @@ import { InfluxDataRecorder } from './../service/recorder/influxDataRecorder';
 
 export default class CalibrationController implements WebsocketWiring {
 
+    public static readonly CALIBRATION_MEASUREMENT = 'reference';
+    public static calibrationQuery(machineId: string) {
+        return `select * from ${this.CALIBRATION_MEASUREMENT} where machine='${machineId}'`;
+    }
+
     // limit calibration duration to x seconds
     public static timeLimit = 30;
 
@@ -84,10 +89,9 @@ export default class CalibrationController implements WebsocketWiring {
     private startCalibration(machine: Machine): DataRecorder {
         // detach detector for this machine
         this.detectors.removeAll(machine);
-        const measurement = `reference-${machine.id}`;
-        const tags = {metric: 'gravity'};
+        const tags = {machine: machine.id, metric: 'gravity'};
         const recorder = new InfluxDataRecorder(this.mqtt, this.influx, machine.sensorIdentifier,
-            'gravity', gravityTransformerTagged, measurement, tags);
+            'gravity', gravityTransformerTagged, CalibrationController.CALIBRATION_MEASUREMENT, tags);
         recorder.start();
         return recorder;
     }

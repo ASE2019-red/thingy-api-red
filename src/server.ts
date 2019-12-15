@@ -8,13 +8,11 @@ import {Connection} from 'typeorm';
 import {loadConfig} from './config';
 import CalibrationController from './controllers/calibration';
 import MeasurementController from './controllers/measurement';
-import NotificationController from './controllers/notification';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
-import CoffeeDetector from './service/detector/thresholdDetector';
-import {Websocket, WebsocketFactory} from './websocket';
 import DetectorManager from './service/detector/manager';
+import {Websocket, WebsocketFactory} from './websocket';
 
 type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middleware;
 // tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
@@ -68,7 +66,7 @@ async function bootstrap() {
         // notificationsWs.broadcastInterval(NotificationController.wsNotify, 10000);
 
         // Initialize detectors for machines
-        const manager = new DetectorManager(mqtt, notificationsWs);
+        const manager = new DetectorManager(mqtt, influx, notificationsWs);
         console.log('Successfully initialized detectors');
 
         const calibrationWs: Websocket = wsFactory.newSocket('/machine/calibration');
