@@ -23,6 +23,7 @@
     "@types/koa-passport": "4.0.1",
     "@types/koa-router": "^7.0.42",
     "@types/koa-session": "5.10.1",
+    "@types/passport-jwt": "3.0.3",
     "@types/pg": "7.11.2",
     "@types/supertest": "2.0.8",
     "@types/ws": "6.0.3",

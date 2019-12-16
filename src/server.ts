@@ -3,22 +3,20 @@ import * as http from 'http';
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
+import * as passport from 'koa-passport';
 import {KoaSwaggerUiOptions} from 'koa2-swagger-ui';
+import {ExtractJwt, Strategy} from 'passport-jwt';
 import {Connection} from 'typeorm';
 import {loadConfig} from './config';
 import CalibrationController from './controllers/calibration';
 import MeasurementController from './controllers/measurement';
 import NotificationController from './controllers/notification';
+import UserController from './controllers/user';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
-import * as passport from 'koa-passport';
-import UserController from './controllers/user';
 import {Websocket, WebsocketFactory} from './websocket';
-
-var JwtStrategy = require("passport-jwt").Strategy;
-var ExtractJwt = require("passport-jwt").ExtractJwt;
 
 type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middleware;
 // tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
@@ -48,28 +46,26 @@ async function bootstrap() {
         // cors
         app.use(cors());
 
-        const JWT_SECRET = "mysecret";
         // passport
-        let passport_options = {
+        const passportOptions = {
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: JWT_SECRET
+            secretOrKey: config.auth.jwtSecret,
         };
-        passport.use(
-            "jwt",
-            new JwtStrategy(passport_options, (jwt_payload: any, done: any) => {
-                console.log("payload received", jwt_payload);
+        passport.use('jwt',
+            new Strategy(passportOptions, (jwtPayload: any, done: any) => {
+                console.log('payload received', jwtPayload);
                 // CHECK IF THE USER IN THE JWT IS VALID
-                UserController.deserialize(jwt_payload.data.id)
+                UserController.deserialize(jwtPayload.data.id)
                     .then(user => {
-                        console.log("User:", user);
+                        console.log('User:', user);
                         if (user)
                             return done(null, user);
                         else
                             return done(null, false);
                     }).catch(error => {
                     console.log(error);
-                })
-            })
+                });
+            }),
         );
         app.use(passport.initialize());
 
@@ -119,8 +115,8 @@ async function bootstrap() {
         app.context.mqtt = mqtt;
 
         newServer.on('close', async () => {
-            pg.close();
-            mqtt.disconnect();
+            await pg.close();
+            await mqtt.disconnect();
             console.log(`Server closed`);
         });
 
