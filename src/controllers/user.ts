@@ -1,12 +1,12 @@
-import { ParameterizedContext } from 'koa';
-import { getManager } from 'typeorm';
-import { User } from '../models/user';
+import {ParameterizedContext} from 'koa';
+import {getManager} from 'typeorm';
+import {User} from '../models/user';
 import * as bcrypt from 'bcrypt';
 import * as passport from 'koa-passport';
 import * as jsonwebtoken from 'jsonwebtoken';
 
 passport.serializeUser((user: User, done) => {
-    done(null, { id: user.id })
+    done(null, {id: user.id})
 })
 
 passport.deserializeUser((user, done) => {
@@ -41,7 +41,7 @@ export default class UserController {
     }
 
     public static async getUsers(ctx: ParameterizedContext) {
-         const users: User[] = await UserController.repository.find();
+        const users: User[] = await UserController.repository.find();
 
         ctx.status = 200;
         ctx.body = users;
@@ -114,17 +114,17 @@ export default class UserController {
         }
     }
 
-     public static async login(ctx: ParameterizedContext) {
-        if (ctx.isAuthenticated() )
+    public static async login(ctx: ParameterizedContext) {
+        if (ctx.isAuthenticated())
             return ctx.redirect('/');
         const body = ctx.request.body;
         console.log(body);
-        const user: User = await UserController.repository.findOne({ email: body.email });
+        const user: User = await UserController.repository.findOne({email: body.email});
         console.log(user);
         if (user == null) {
             ctx.status = 401;
             ctx.body = {
-              message: "Authentication failed"
+                message: "Authentication failed"
             };
             return ctx;
         }
@@ -135,11 +135,11 @@ export default class UserController {
             ctx.body.token = jsonwebtoken.sign(UserController.serialize(user), JWT_SECRET);
             await ctx.login(user);
             console.log(ctx.state.user);
-          } else {
+        } else {
             ctx.status = 401;
             ctx.body = {
-              message: "Authentication failed"
+                message: "Authentication failed"
             };
-          }
+        }
     }
 }

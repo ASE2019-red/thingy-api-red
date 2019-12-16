@@ -1,11 +1,5 @@
-import { IsEmail, Length } from 'class-validator';
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm';
+import {IsEmail, Length} from 'class-validator';
+import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn,} from 'typeorm';
 
 @Entity()
 export class User {
@@ -27,9 +21,9 @@ export class User {
     @Column('boolean')
     public active: boolean;
 
-    @CreateDateColumn({ type: 'timestamptz' })
+    @CreateDateColumn({type: 'timestamptz'})
     public createdAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamptz' })
+    @UpdateDateColumn({type: 'timestamptz'})
     public updatedAt: Date;
 }

@@ -13,14 +13,12 @@ import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
 import CoffeeDetector from './service/coffeeDetector';
-import DataRecorder from './service/recorder/dataRecorder';
-import {InfluxDataRecorder} from './service/recorder/influxDataRecorder';
-import { gravityTransformerTagged } from './service/thingy';
 import * as passport from 'koa-passport';
 import UserController from './controllers/user';
+import {Websocket, WebsocketFactory} from './websocket';
+
 var JwtStrategy = require("passport-jwt").Strategy;
 var ExtractJwt = require("passport-jwt").ExtractJwt;
-import {Websocket, WebsocketFactory} from './websocket';
 
 type koa2SwaggerUiFunc = (config: Partial<KoaSwaggerUiOptions>) => Koa.Middleware;
 // tslint:disable-next-line: no-var-requires // We actually have to use require for koa2-swagger-ui
@@ -55,7 +53,7 @@ async function bootstrap() {
         let passport_options = {
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: JWT_SECRET
-        }
+        };
         passport.use(
             "jwt",
             new JwtStrategy(passport_options, (jwt_payload: any, done: any) => {
@@ -69,10 +67,10 @@ async function bootstrap() {
                         else
                             return done(null, false);
                     }).catch(error => {
-                        console.log(error);
-                    })
+                    console.log(error);
+                })
             })
-        )
+        );
         app.use(passport.initialize());
 
         // Logger
