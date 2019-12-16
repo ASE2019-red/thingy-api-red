@@ -23,6 +23,7 @@ router.get('/machine/:id/coffee', MachineController.getMachineCoffees);
 router.get('/machine', MachineController.getMachines);
 router.get('/machine/:id', MachineController.getMachine);
 router.post('/machine', MachineController.createMachine);
+router.put('/machine', MachineController.updateMachine);
 
 // User endpoint
 router.get('/users/:id', userController.getUser);
