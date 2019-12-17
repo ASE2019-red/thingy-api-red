@@ -35,16 +35,6 @@ async function createCoffees(machine: Machine, count: number) {
     return await Promise.all(updatePromises);
 }
 
-async function createUser(name: string, email: string) {
-    const user = new User();
-    user.email = email;
-    user.name = name;
-    // unused currently
-    user.hashedPassword = '';
-
-    return await getRepository(User).save(user);
-}
-
 async function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -75,10 +65,6 @@ async function seed() {
 
         await createCoffees(machine1, 36);
         await createCoffees(machine2, 24);
-
-        await createUser('User 1', 'user1@testemail.test');
-        await createUser('User 2', 'user2@testemail.test');
-        await createUser('User 3', 'user3@testemail.test');
 
         await insertTestMeasurements(influx);
 
