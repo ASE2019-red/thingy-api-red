@@ -24,7 +24,6 @@ router.get('/machine/:id', MachineController.getMachine);
 router.put('/machine', MachineController.updateMachine);
 router.post('/machine', MachineController.createMachine);
 
-console.log('ENV is ' + process.env.NODE_ENV);
 if (process.env.NODE_ENV !== 'production') {
     router.post('/machine/:id/coffee', MachineController.postMachineCoffee);
 }

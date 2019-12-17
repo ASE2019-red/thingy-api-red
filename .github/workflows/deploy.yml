@@ -12,10 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Prepare env variables
-        run: cp .env.example .env && echo MQTT_USER=$MQTT_USER >> .env && echo MQTT_PW=$MQTT_PW >> .env
+        run: | 
+          cp .env.example .env 
+          echo MQTT_USER=$MQTT_USER >> .env 
+          echo MQTT_PW=$MQTT_PW >> .env
+          echo JWT_SECRET=$JWT_SECRET >> .env 
+          echo NODE_RED_SLACK_WEBHOOK=$NODE_RED_SLACK_WEBHOOK >> .env
         env:
           MQTT_USER: ${{ secrets.MQTT_USER }}
           MQTT_PW: ${{ secrets.MQTT_PW }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NODE_RED_SLACK_WEBHOOK: ${{ secrets.NODE_RED_SLACK_WEBHOOK }}
 
       - name: Build image
         run: |
