@@ -29,7 +29,7 @@ To use the docker-compose stack in production, run the following:
 The definition of the API can be found in the [swagger.yaml](./swagger.yaml) file. If the API is running, this definition is displayed at its [root](http://localhost:8000/).
 
 ## Persistence
-The two database systems can be started for local development via `docker-compose`. The ports are published, which makes it possible to access the databases.
+The two database systems can be started for local development via `docker-compose up -d influx postgres`. The ports are published, which makes it possible to access the databases.
 
 For the productive environment, the microservices are located in a common overlay network, which makes external access impossible.
 
