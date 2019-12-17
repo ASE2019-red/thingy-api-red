@@ -7,6 +7,11 @@ export function loadConfig() {
         prettyLog: process.env.NODE_ENV == 'development',
         swaggerApiUrl: process.env.SWAGGER_API_URL,
 
+        auth: {
+            jwtSecret: process.env.JWT_SECRET,
+            jwtExpire: process.env.JWT_EXPIRE,
+
+        },
         flux: {
             hostname: process.env.INFLUXDB_HOST,
             port: process.env.INFLUXDB_PORT,

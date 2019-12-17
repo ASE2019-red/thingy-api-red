@@ -14,10 +14,16 @@
     "run-server": "ts-node ./src/server.ts"
   },
   "devDependencies": {
+    "@types/bcrypt": "2.0.0",
     "@types/jest": "24.0.18",
+    "@types/jsonwebtoken": "8.3.5",
     "@types/koa": "^2.0.50",
     "@types/koa-bodyparser": "4.3.0",
+    "@types/koa-jwt": "3.3.0",
+    "@types/koa-passport": "4.0.1",
     "@types/koa-router": "^7.0.42",
+    "@types/koa-session": "5.10.1",
+    "@types/passport-jwt": "3.0.3",
     "@types/pg": "7.11.2",
     "@types/supertest": "2.0.8",
     "@types/ws": "6.0.3",
@@ -39,9 +45,17 @@
   "dependencies": {
     "@koa/cors": "2.2.3",
     "@types/koa__cors": "2.2.3",
+    "bcrypt": "3.0.7",
+    "jsonwebtoken": "8.5.1",
     "koa": "^2.9.0",
     "koa-bodyparser": "4.2.1",
+    "koa-jwt": "3.6.0",
+    "koa-passport": "4.1.3",
     "koa-router": "^7.4.0",
+    "koa-session": "5.12.3",
+    "passport-jwt": "4.0.0",
+    "passport-local": "1.0.0",
+    "swagger-ui": "^3.24.3",
     "koa2-swagger-ui": "2.15.4",
     "moment": "2.24.0"
   }

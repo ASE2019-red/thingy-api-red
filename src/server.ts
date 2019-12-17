@@ -3,12 +3,15 @@ import * as http from 'http';
 import {InfluxDB} from 'influx';
 import * as Koa from 'koa';
 import * as bodyParser from 'koa-bodyparser';
+import * as passport from 'koa-passport';
 import {KoaSwaggerUiOptions} from 'koa2-swagger-ui';
+import {ExtractJwt, Strategy} from 'passport-jwt';
 import {Connection} from 'typeorm';
 import {loadConfig} from './config';
 import CalibrationController from './controllers/calibration';
 import MeasurementController from './controllers/measurement';
 import NotificationController from './controllers/notification';
+import UserController from './controllers/user';
 import MQTTTopicClient from './mqtt/client';
 import {influxConn, pgConn} from './persistence/database';
 import {routes} from './routes';
@@ -42,6 +45,29 @@ async function bootstrap() {
 
         // cors
         app.use(cors());
+
+        // passport
+        const passportOptions = {
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            secretOrKey: config.auth.jwtSecret,
+        };
+        passport.use('jwt',
+            new Strategy(passportOptions, (jwtPayload: any, done: any) => {
+                console.log('payload received', jwtPayload);
+                // CHECK IF THE USER IN THE JWT IS VALID
+                UserController.deserialize(jwtPayload.data.id)
+                    .then(user => {
+                        console.log('User:', user);
+                        if (user)
+                            return done(null, user);
+                        else
+                            return done(null, false);
+                    }).catch(error => {
+                    console.log(error);
+                });
+            }),
+        );
+        app.use(passport.initialize());
 
         // Logger
         app.use(async (ctx, next) => {
@@ -89,8 +115,8 @@ async function bootstrap() {
         app.context.mqtt = mqtt;
 
         newServer.on('close', async () => {
-            pg.close();
-            mqtt.disconnect();
+            await pg.close();
+            await mqtt.disconnect();
             console.log(`Server closed`);
         });
 
