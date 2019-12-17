@@ -1,13 +1,13 @@
 import * as bcrypt from 'bcrypt';
 import * as jsonwebtoken from 'jsonwebtoken';
-import {ParameterizedContext} from 'koa';
+import { ParameterizedContext } from 'koa';
 import * as passport from 'koa-passport';
-import {getManager} from 'typeorm';
-import {loadConfig} from '../config';
-import {User} from '../models/user';
+import { getManager } from 'typeorm';
+import { loadConfig } from '../config';
+import { User } from '../models/user';
 
 passport.serializeUser((user: User, done) => {
-    done(null, {id: user.id});
+    done(null, { id: user.id });
 });
 
 passport.deserializeUser((user, done) => {
@@ -59,9 +59,9 @@ export default class UserController {
 
             ctx.status = 200;
             ctx.body = UserController.serialize(savedUser);
-            ctx.body.token = jsonwebtoken.sign(UserController.serialize(savedUser), this.config.auth.jwtSecret);
-
-        } catch {
+            ctx.body.token = jsonwebtoken.sign(UserController.serialize(savedUser),
+                                               UserController.config.auth.jwtSecret);
+        } catch (err) {
             ctx.status = 500;
             ctx.body = 'Saving the user failed';
         }
@@ -104,7 +104,7 @@ export default class UserController {
             return ctx.redirect('/');
         const body = ctx.request.body;
         console.log(body);
-        const user: User = await UserController.repository.findOne({email: body.email});
+        const user: User = await UserController.repository.findOne({ email: body.email });
         console.log(user);
         if (user == null) {
             ctx.status = 401;
@@ -117,7 +117,7 @@ export default class UserController {
         if (user.active && correctLoginData) {
             ctx.status = 200;
             ctx.body = UserController.serialize(user);
-            ctx.body.token = jsonwebtoken.sign(UserController.serialize(user), this.config.auth.jwtSecret);
+            ctx.body.token = jsonwebtoken.sign(UserController.serialize(user), UserController.config.auth.jwtSecret);
             await ctx.login(user);
             console.log(ctx.state.user);
         } else {
