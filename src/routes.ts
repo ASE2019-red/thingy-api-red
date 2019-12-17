@@ -1,12 +1,14 @@
+import * as passport from 'koa-passport';
 import * as Router from 'koa-router';
 import CoffeeController from './controllers/coffee';
 import MachineController from './controllers/machine';
 import MeasurementController from './controllers/measurement';
-import userController from './controllers/user';
+import UserController from './controllers/user';
+import AuthenticationController from './middlewares/authentication';
 
 const router = new Router();
 
-router.get('/ping', (context) => {
+router.get('/ping', AuthenticationController.requireLogin, (context) => {
     context.status = 200;
     context.body = 'pong';
 });
@@ -28,7 +30,12 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // User endpoint
-router.get('/users/:id', userController.getUser);
+router.get('/user', passport.authenticate('jwt', {session: false}), UserController.getUsers);
+router.get('/user/:id', passport.authenticate('jwt', {session: false}), UserController.getUser);
+router.post('/user', UserController.registerUser);
+router.post('/user/:id', passport.authenticate('jwt', {session: false}), UserController.updateUser);
+router.post('/login', UserController.login);
+router.delete('/user/:id', passport.authenticate('jwt', {session: false}), UserController.deleteUser);
 
 // Measurement endpoint
 router.get('/measurements', MeasurementController.getAll);

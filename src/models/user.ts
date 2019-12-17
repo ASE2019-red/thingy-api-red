@@ -1,13 +1,7 @@
-import { IsEmail, Length } from 'class-validator';
-import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-} from 'typeorm';
+import {IsEmail, Length} from 'class-validator';
+import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn} from 'typeorm';
 
-@Entity('users')
+@Entity()
 export class User {
 
     @PrimaryGeneratedColumn('uuid')
@@ -24,9 +18,12 @@ export class User {
     @Column('text')
     public hashedPassword: string;
 
-    @CreateDateColumn({ type: 'timestamptz' })
+    @Column('boolean')
+    public active: boolean;
+
+    @CreateDateColumn({type: 'timestamptz'})
     public createdAt: Date;
 
-    @UpdateDateColumn({ type: 'timestamptz' })
+    @UpdateDateColumn({type: 'timestamptz'})
     public updatedAt: Date;
 }
