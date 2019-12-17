@@ -1,14 +1,13 @@
 import { ParameterizedContext } from 'koa';
+import passport = require('passport');
 
-export default class AuthenticationController {
-    public static async requireLogin( ctx: ParameterizedContext, next: () => Promise<any>) {
-        if (ctx.isAuthenticated()) {
-            await next();
-          } else {
-            ctx.status = 401;
-            ctx.body = {
-              errors: [{ title: 'Login required', status: 401 }],
-            };
-          }
+const authenticate = passport.authenticate('jwt', { session: false });
+
+export const authenticationMiddleware = (skipAuth: boolean) =>
+  async (ctx: ParameterizedContext, next: () => Promise<any>) => {
+    if (skipAuth) {
+      await next();
+      return;
     }
-}
+    await authenticate(ctx, next);
+  };

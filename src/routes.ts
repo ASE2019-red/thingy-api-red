@@ -4,8 +4,10 @@ import CoffeeController from './controllers/coffee';
 import MachineController from './controllers/machine';
 import MeasurementController from './controllers/measurement';
 import UserController from './controllers/user';
+import { authenticationMiddleware } from './middlewares/authentication';
 
 const router = new Router();
+const isTestEnv = process.env.NODE_ENV === 'test';
 
 router.get('/ping', (context) => {
     context.status = 200;
@@ -13,34 +15,34 @@ router.get('/ping', (context) => {
 });
 
 // Coffee endpoint
-router.get('/coffee', passport.authenticate('jwt', { session: false }), CoffeeController.getCoffees);
-router.get('/coffee/:id', passport.authenticate('jwt', { session: false }), CoffeeController.getCoffee);
+router.get('/coffee', authenticationMiddleware(isTestEnv), CoffeeController.getCoffees);
+router.get('/coffee/:id', authenticationMiddleware(isTestEnv), CoffeeController.getCoffee);
 
 // Machine endpoint
 router.get('/machine/:id/coffee',
-           passport.authenticate('jwt', { session: false }),
+           authenticationMiddleware(isTestEnv),
            MachineController.getMachineCoffees);
-router.get('/machine', passport.authenticate('jwt', { session: false }), MachineController.getMachines);
-router.get('/machine/:id', passport.authenticate('jwt', { session: false }), MachineController.getMachine);
-router.put('/machine', passport.authenticate('jwt', { session: false }), MachineController.updateMachine);
-router.post('/machine', passport.authenticate('jwt', { session: false }), MachineController.createMachine);
+router.get('/machine', authenticationMiddleware(isTestEnv), MachineController.getMachines);
+router.get('/machine/:id', authenticationMiddleware(isTestEnv), MachineController.getMachine);
+router.put('/machine', authenticationMiddleware(isTestEnv), MachineController.updateMachine);
+router.post('/machine', authenticationMiddleware(isTestEnv), MachineController.createMachine);
 
 if (process.env.NODE_ENV !== 'production') {
     router.post('/machine/:id/coffee',
-                passport.authenticate('jwt', { session: false }),
+                authenticationMiddleware(isTestEnv),
                 MachineController.postMachineCoffee);
 }
 
 // User endpoint
-router.get('/user', passport.authenticate('jwt', { session: false }), UserController.getUsers);
-router.get('/user/:id', passport.authenticate('jwt', { session: false }), UserController.getUser);
+router.get('/user', authenticationMiddleware(isTestEnv), UserController.getUsers);
+router.get('/user/:id', authenticationMiddleware(isTestEnv), UserController.getUser);
 router.post('/user', UserController.registerUser);
-router.post('/user/:id', passport.authenticate('jwt', { session: false }), UserController.updateUser);
+router.post('/user/:id', authenticationMiddleware(isTestEnv), UserController.updateUser);
 router.post('/login', UserController.login);
-router.delete('/user/:id', passport.authenticate('jwt', { session: false }), UserController.deleteUser);
+router.delete('/user/:id', authenticationMiddleware(isTestEnv), UserController.deleteUser);
 
 // Measurement endpoint
-router.get('/measurements', passport.authenticate('jwt', { session: false }), MeasurementController.getAll);
-router.get('/measurements/:id', passport.authenticate('jwt', { session: false }), MeasurementController.getById);
+router.get('/measurements', authenticationMiddleware(isTestEnv), MeasurementController.getAll);
+router.get('/measurements/:id', authenticationMiddleware(isTestEnv), MeasurementController.getById);
 
 export const routes = router.routes();
