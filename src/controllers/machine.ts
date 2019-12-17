@@ -69,7 +69,11 @@ export default class MachineController {
         try {
             await MachineController.repository.update(body.id, partial);
             const savedMachine = await MachineController.repository.findOne(body.id);
-            // TODO: update detectors (other branch)
+            // update attached detectors for updated machine
+            const detectors: DetectorManager = ctx.detectors;
+            detectors.removeAll(savedMachine);
+            detectors.createAll(savedMachine);
+
             ctx.status = 200;
             ctx.body = savedMachine;
         } catch {
