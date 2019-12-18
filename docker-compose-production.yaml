@@ -25,6 +25,15 @@ services:
       - /resources/init-postgres:/docker-entrypoint-initdb.d
     env_file: [.env]
 
+  node-red:
+    image: nodered/node-red:latest
+    ports:
+      - 1880:1880
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /resources/init-nodred/flows.json:/data/flows.json
+    env_file: [.env]
+
   api:
     image: ase2019red/thingy-api-red:latest
     restart: on-failure

@@ -1,13 +1,13 @@
 import * as bcrypt from 'bcrypt';
 import * as jsonwebtoken from 'jsonwebtoken';
-import {ParameterizedContext} from 'koa';
+import { ParameterizedContext } from 'koa';
 import * as passport from 'koa-passport';
-import {getManager} from 'typeorm';
-import {loadConfig} from '../config';
-import {User} from '../models/user';
+import { getManager } from 'typeorm';
+import { loadConfig } from '../config';
+import { User } from '../models/user';
 
 passport.serializeUser((user: User, done) => {
-    done(null, {id: user.id});
+    done(null, { id: user.id });
 });
 
 passport.deserializeUser((user, done) => {
@@ -48,6 +48,28 @@ export default class UserController {
         const newUser = new User();
         const body = ctx.request.body;
         console.log('Body: ', body);
+        if (!body.name) {
+            ctx.status = 400;
+            ctx.body = 'Field name is required.';
+            return;
+        }
+        if (!body.email) {
+            ctx.status = 400;
+            ctx.body = 'Field email is required.';
+            return;
+        }
+        if (!body.psw) {
+            ctx.status = 400;
+            ctx.body = 'Field psw is required.';
+            return;
+        }
+
+        const existingUser = await UserController.repository.findOne({email: body.email});
+        if (!!existingUser) {
+            ctx.status = 409;
+            ctx.body = 'Email address is already taken.';
+            return;
+        }
         newUser.name = body.name;
         newUser.email = body.email;
         newUser.hashedPassword = await bcrypt.hash(body.psw, UserController.hashRounds);
@@ -57,9 +79,9 @@ export default class UserController {
 
             ctx.status = 201;
             ctx.body = UserController.serialize(savedUser);
-            ctx.body.token = jsonwebtoken.sign(UserController.serialize(savedUser), this.config.auth.jwtSecret);
-
-        } catch {
+            ctx.body.token = jsonwebtoken.sign(UserController.serialize(savedUser),
+                                               UserController.config.auth.jwtSecret);
+        } catch (err) {
             ctx.status = 422;
             ctx.body = 'Saving the user failed';
         }
@@ -117,8 +139,8 @@ export default class UserController {
         if (user.active && correctLoginData) {
             ctx.status = 200;
             ctx.body = UserController.serialize(user);
-            ctx.body.token = jsonwebtoken.sign(UserController.serialize(user), this.config.auth.jwtSecret);
-            console.log(ctx.body);
+            ctx.body.token = jsonwebtoken.sign(UserController.serialize(user),
+                                                UserController.config.auth.jwtSecret);
             await ctx.login(user);
         } else {
             ctx.status = 401;

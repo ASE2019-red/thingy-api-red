@@ -10,7 +10,7 @@ export const topicDefinitionsForDevice = (mac: string): TopicDefinitions => {
     return {
         connected: `${mac}/Connected`,
         gravity: `${mac}/Thingy Motion Service/Thingy Gravity Characteristic`,
-        acceleration: `${mac}/Thingy Motion Service/Thingy Acceleration Characteristic`,
+        acceleration: `${mac}/Thingy Motion Service/Thingy Motion Raw data`,
         sound: `${mac}/Thingy Sound Service/Thingy Microphone Characteristic`,
     };
 };

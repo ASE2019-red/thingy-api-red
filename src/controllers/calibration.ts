@@ -1,6 +1,7 @@
 import { InfluxDB } from 'influx';
 import { getManager } from 'typeorm';
 import * as WebSocket from 'ws';
+import DetectorManager from '../service/detector/manager';
 import DataRecorder from '../service/recorder/dataRecorder';
 import { gravityTransformerTagged } from '../service/thingy';
 import { WebsocketWiring } from '../websocket';
@@ -10,14 +11,18 @@ import { InfluxDataRecorder } from './../service/recorder/influxDataRecorder';
 
 export default class CalibrationController implements WebsocketWiring {
 
+    public static readonly CALIBRATION_MEASUREMENT = 'reference';
     // limit calibration duration to x seconds
-    public static timeLimit = 30;
+    public static readonly TIME_LIMIT = 30;
+    public static calibrationQuery(machineId: string) {
+        return `select * from ${this.CALIBRATION_MEASUREMENT} where machine='${machineId}'`;
+    }
 
     private static get repository() {
         return getManager().getRepository(Machine);
     }
 
-    constructor(private mqtt: MQTTTopicClient, private influx: InfluxDB) {}
+    constructor(private mqtt: MQTTTopicClient, private influx: InfluxDB, private detectors: DetectorManager) {}
 
     public addListeners(ws: WebSocket): void {
 
@@ -32,14 +37,14 @@ export default class CalibrationController implements WebsocketWiring {
             }
             machine = await CalibrationController.repository.findOne(data['id']);
             if (machine) {
-                recorder = this.startCalibration(machine.id, machine.sensorIdentifier);
+                recorder = await this.startCalibration(machine);
 
-                const answer = {calibrating: true, limit: CalibrationController.timeLimit};
+                const answer = {calibrating: true, limit: CalibrationController.TIME_LIMIT};
                 ws.send(JSON.stringify(answer));
 
                 timeout = setTimeout(() => {
                     ws.close(1000, 'timeout');
-                }, CalibrationController.timeLimit * 1000);
+                }, CalibrationController.TIME_LIMIT * 1000);
 
             } else {
                 ws.close(1008, 'Machine does not exist.');
@@ -75,14 +80,22 @@ export default class CalibrationController implements WebsocketWiring {
         if (!!recorder) recorder.stop();
         if (!!machine) {
             machine.calibrated = success;
-            await CalibrationController.repository.save(machine);
+            const savedMachine = await CalibrationController.repository.save(machine);
+            // attach detectors for this machine
+            this.detectors.createAll(savedMachine);
         }
     }
-    private startCalibration(machineId: string, sensorIdentifier: string): DataRecorder {
-        const measurement = `reference-${machineId}`;
-        const tags = {metric: 'gravity'};
-        const recorder = new InfluxDataRecorder(this.mqtt, this.influx, sensorIdentifier,
-            'gravity', gravityTransformerTagged, measurement, tags);
+    private async startCalibration(machine: Machine): Promise<DataRecorder> {
+        // detach detector for this machine
+        this.detectors.removeAll(machine);
+        // drop reference series
+        await this.influx.dropSeries({
+            measurement: m => m.name(CalibrationController.CALIBRATION_MEASUREMENT),
+            where: w => w.tag('machine').equals.value(machine.id),
+        });
+        const tags = {machine: machine.id, metric: 'gravity'};
+        const recorder = new InfluxDataRecorder(this.mqtt, this.influx, machine.sensorIdentifier,
+            'gravity', gravityTransformerTagged, CalibrationController.CALIBRATION_MEASUREMENT, tags);
         recorder.start();
         return recorder;
     }

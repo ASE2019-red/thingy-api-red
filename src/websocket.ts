@@ -42,7 +42,9 @@ class Websocket {
     public async broadcast(callback: any) {
         for (const client of this.wss.clients) {
             if (client.readyState === WebSocket.OPEN) {
-                client.send(await (callback(this.ctx, this.params)));
+                const data = await (callback(this.ctx, this.params));
+                console.log(`Broadcast data to clients.`);
+                client.send(data);
             }
         }
     }
