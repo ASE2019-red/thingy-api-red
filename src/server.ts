@@ -38,11 +38,11 @@ async function bootstrap() {
         const app: Koa = new Koa();
 
         // cors
-        app.use(cors());
+        app.use(cors({allowHeaders: ['Authorization']}));
 
         // passport
         const passportOptions = {
-            jwtFromRequest: ExtractJwt.fromHeader('authorization'),
+            jwtFromRequest: ExtractJwt.fromHeader('Authorization'),
             secretOrKey: config.auth.jwtSecret,
         };
         passport.use('jwt',
