@@ -33,8 +33,6 @@ export default class UserController {
     }
 
     public static async getUser(ctx: ParameterizedContext) {
-        // TODO: Pass ID via parameter set
-        // const user: User = await UserController.repository.findOne(ctx.params.id);
         const user: User = await UserController.deserialize(ctx.params.id);
 
         if (user) {
@@ -90,10 +88,32 @@ export default class UserController {
     }
 
     public static async updateUser(ctx: ParameterizedContext) {
-        // ToDo
-        const user: User = await UserController.deserialize(ctx.params.id);
+        const body = ctx.request.body;
+        if (body.id != ctx.params.id) {
+            ctx.status = 400;
+            ctx.body = 'Unmatching ID in request and boddy';
+            return;
+        }
+        if (!body.id) {
+            ctx.status = 400;
+            ctx.body = 'Invalid ID supplied';
+            return;
+        }
+        const user: User = await UserController.deserialize(body.id);
+        if (!user) {
+            ctx.status = 400;
+            ctx.body = 'User not found';
+            return;
+        }
+        const partial = new User();
+        if (body.name) partial.name = body.name;
+        if (body.email) partial.email = body.email;
+        if (body.psw) partial.hashedPassword = await bcrypt.hash(body.psw, UserController.hashRounds);
+        if (body.active === true) partial.active = true;
+        else if (body.active === false) partial.active = false;
         try {
-            const updatedUser = await UserController.repository.save(user);
+            await UserController.repository.update(body.id, partial);
+            const updatedUser = await UserController.deserialize(body.id);
             ctx.status = 200;
             ctx.body = updatedUser;
         } catch {
@@ -103,12 +123,23 @@ export default class UserController {
     }
 
     public static async deleteUser(ctx: ParameterizedContext) {
-        // TODO
-        const user: User = await UserController.deserialize(ctx.params.id);
+        const id = ctx.params.id;
+        if (!id) {
+            ctx.status = 400;
+            ctx.body = 'Invalid ID supplied';
+            return;
+        }
+        const user: User = await UserController.deserialize(id);
+        if (!user) {
+            ctx.status = 400;
+            ctx.body = 'User not found';
+            return;
+        }
         if (user.active) {
             user.active = false;
             try {
-                const updatedUser = await UserController.repository.save(user);
+                await UserController.repository.update(id, user);
+                const updatedUser = await UserController.deserialize(id);
                 ctx.status = 200;
                 ctx.body = updatedUser;
             } catch {
