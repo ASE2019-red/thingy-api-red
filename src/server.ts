@@ -42,7 +42,7 @@ async function bootstrap() {
 
         // passport
         const passportOptions = {
-            jwtFromRequest: ExtractJwt.fromHeader('Authorization'),
+            jwtFromRequest: ExtractJwt.fromHeader('authorization'),
             secretOrKey: config.auth.jwtSecret,
         };
         passport.use('jwt',
