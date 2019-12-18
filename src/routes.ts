@@ -37,7 +37,7 @@ if (process.env.NODE_ENV !== 'production') {
 router.get('/user', authenticationMiddleware(isTestEnv), UserController.getUsers);
 router.get('/user/:id', authenticationMiddleware(isTestEnv), UserController.getUser);
 router.post('/user', UserController.registerUser);
-router.post('/user/:id', authenticationMiddleware(isTestEnv), UserController.updateUser);
+router.put('/user/:id', authenticationMiddleware(isTestEnv), UserController.updateUser);
 router.post('/login', UserController.login);
 router.delete('/user/:id', authenticationMiddleware(isTestEnv), UserController.deleteUser);
 
