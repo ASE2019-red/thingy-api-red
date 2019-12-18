@@ -33,8 +33,6 @@ export default class UserController {
     }
 
     public static async getUser(ctx: ParameterizedContext) {
-        // TODO: Pass ID via parameter set
-        // const user: User = await UserController.repository.findOne(ctx.params.id);
         const user: User = await UserController.deserialize(ctx.params.id);
 
         if (user) {
@@ -57,19 +55,23 @@ export default class UserController {
         try {
             const savedUser = await UserController.repository.save(newUser);
 
-            ctx.status = 200;
+            ctx.status = 201;
             ctx.body = UserController.serialize(savedUser);
             ctx.body.token = jsonwebtoken.sign(UserController.serialize(savedUser), this.config.auth.jwtSecret);
 
         } catch {
-            ctx.status = 500;
+            ctx.status = 422;
             ctx.body = 'Saving the user failed';
         }
     }
 
     public static async updateUser(ctx: ParameterizedContext) {
+        const body = ctx.request.body;
         // ToDo
         const user: User = await UserController.deserialize(ctx.params.id);
+        user.name = body.name;
+        user.email = body.email;
+        user.hashedPassword = await bcrypt.hash(body.psw, UserController.hashRounds);
         try {
             const updatedUser = await UserController.repository.save(user);
             ctx.status = 200;
@@ -103,9 +105,7 @@ export default class UserController {
         if (ctx.isAuthenticated())
             return ctx.redirect('/');
         const body = ctx.request.body;
-        console.log(body);
         const user: User = await UserController.repository.findOne({email: body.email});
-        console.log(user);
         if (user == null) {
             ctx.status = 401;
             ctx.body = {
@@ -118,8 +118,8 @@ export default class UserController {
             ctx.status = 200;
             ctx.body = UserController.serialize(user);
             ctx.body.token = jsonwebtoken.sign(UserController.serialize(user), this.config.auth.jwtSecret);
+            console.log(ctx.body);
             await ctx.login(user);
-            console.log(ctx.state.user);
         } else {
             ctx.status = 401;
             ctx.body = {

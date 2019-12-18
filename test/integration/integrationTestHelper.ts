@@ -2,6 +2,7 @@ import { Connection, getConnection, getRepository } from 'typeorm';
 import {getManager} from 'typeorm';
 import { Coffee } from '../../src/models/coffee';
 import { Machine } from '../../src/models/machine';
+import { User } from '../../src/models/user';
 
 // important: Call after 'await server' to assure db connection is up
 export async function cleanAllTables() {
@@ -43,4 +44,13 @@ export async function createTestCoffees(machine: Machine, count: number) {
     }
 
     return await getRepository(Coffee).save(coffees);
+}
+
+export async function createTestUser() {
+    const newUser = new User();
+    newUser.name = 'Test User';
+    newUser.email = 'user@test.ch';
+    newUser.hashedPassword = 'Password';
+    newUser.active = true;
+    return await getRepository(User).save(newUser);
 }
