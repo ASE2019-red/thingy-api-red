@@ -38,7 +38,7 @@ async function bootstrap() {
         const app: Koa = new Koa();
 
         // cors
-        app.use(cors());
+        app.use(cors({credentials: true, allowHeaders: ['Authorization', 'Content-Type']}));
 
         // passport
         const passportOptions = {
