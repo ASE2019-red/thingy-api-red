@@ -89,6 +89,11 @@ export default class UserController {
 
     public static async updateUser(ctx: ParameterizedContext) {
         const body = ctx.request.body;
+        if (body.id != ctx.params.id) {
+            ctx.status = 400;
+            ctx.body = 'Unmatching ID in request and boddy';
+            return;
+        }
         if (!body.id) {
             ctx.status = 400;
             ctx.body = 'Invalid ID supplied';
@@ -118,12 +123,13 @@ export default class UserController {
     }
 
     public static async deleteUser(ctx: ParameterizedContext) {
-        if (!ctx.request.body.id) {
+        const id = ctx.params.id;
+        if (!id) {
             ctx.status = 400;
             ctx.body = 'Invalid ID supplied';
             return;
         }
-        const user: User = await UserController.deserialize(ctx.request.body.id);
+        const user: User = await UserController.deserialize(id);
         if (!user) {
             ctx.status = 400;
             ctx.body = 'User not found';
@@ -132,8 +138,8 @@ export default class UserController {
         if (user.active) {
             user.active = false;
             try {
-                await UserController.repository.update(ctx.request.body.id, user);
-                const updatedUser = await UserController.deserialize(ctx.request.body.id);
+                await UserController.repository.update(id, user);
+                const updatedUser = await UserController.deserialize(id);
                 ctx.status = 200;
                 ctx.body = updatedUser;
             } catch {
