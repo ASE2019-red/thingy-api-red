@@ -1,79 +1,25 @@
 swagger: '2.0'
 info:
-  version: '1.0'
+  version: '2.0'
   title: 'Coffee Counter API'
-  description: ''
+  description: 'API definitions for https://github.com/ASE2019-red/thingy-api-red'
 tags:
 - name: coffee
   description: Everything about your coffees
-  externalDocs:
-    description: Find out more
-    url: https://github.com/ASE2019-red/thingy-api-red
 - name: machine
-  description: Access to coffeemachine orders
+  description: Access to the coffee machines
+- name: user
+  description: Operations about user
 
 
-paths: 
+
+paths:
   /coffee:
-    post:
-      tags:
-      - coffee
-      summary: Add a new coffee to the machine
-      operationId: addCoffee
-      consumes:
-      - application/json
-      - application/xml
-      produces:
-      - application/json
-      - application/xml
-      parameters:
-      - in: body
-        name: body
-        description: Coffee object that needs to be added to the machine
-        required: true
-        schema:
-          $ref: '#/definitions/Coffee'
-      responses:
-        405:
-          description: Invalid input
-      security:
-      - coffeemachine_auth:
-        - write:coffees
-        - read:coffees
-    put:
-      tags:
-      - coffee
-      summary: Update an existing coffee
-      operationId: updateCoffee
-      consumes:
-      - application/json
-      - application/xml
-      produces:
-      - application/json
-      - application/xml
-      parameters:
-      - in: body
-        name: body
-        description: Coffee object that needs to be added to the machine
-        required: true
-        schema:
-          $ref: '#/definitions/Coffee'
-      responses:
-        400:
-          description: Invalid ID supplied
-        404:
-          description: Coffee not found
-        405:
-          description: Validation exception
-      security:
-      - coffeemachine_auth:
-        - write:coffees
-        - read:coffees
     get:
       tags:
       - coffee
       summary: Get all coffees
-      operationId: allCoffees
+      operationId: getCoffees
       produces:
       - application/json
       description: Return a list of all coffees
@@ -84,125 +30,42 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Coffee'
-              
+      security:
+        - ApiJwtAuth: []
+
   /coffee/{coffeeId}:
     get:
       tags:
       - coffee
       summary: Find coffee by ID
       description: Returns a single coffee
-      operationId: getCoffeeById
+      operationId: getCoffee
       produces:
       - application/json
-      - application/xml
       parameters:
       - name: coffeeId
         in: path
         description: ID of coffee to return
         required: true
-        type: integer
-        format: int64
+        type: string
+        format: uuid
       responses:
         200:
           description: successful operation
           schema:
             $ref: '#/definitions/Coffee'
         400:
-          description: Invalid ID supplied
-        404:
-          description: Coffee not found
+          description: coffee doesn't exist
       security:
-      - api_key: []
-    delete:
-      tags:
-      - coffee
-      summary: Deletes a coffee
-      operationId: deleteCoffee
-      produces:
-      - application/json
-      - application/xml
-      parameters:
-      - name: api_key
-        in: header
-        required: false
-        type: string
-      - name: coffeeId
-        in: path
-        description: Coffee id to delete
-        required: true
-        type: integer
-        format: int64
-      responses:
-        400:
-          description: Invalid ID supplied
-        404:
-          description: Coffee not found
-      security:
-      - coffeemachine_auth:
-        - write:coffees
-        - read:coffees
+        - ApiJwtAuth: []
 
-        
+
   /machine:
-    post:
-      tags:
-      - machine
-      summary: Add a new machine
-      operationId: addMachine
-      consumes:
-      - application/json
-      - application/xml
-      produces:
-      - application/json
-      - application/xml
-      parameters:
-      - in: body
-        name: body
-        description: Machine object that needs to be added as a possible beverage maker
-        required: true
-        schema:
-          $ref: '#/definitions/Machine'
-      responses:
-        405:
-          description: Invalid input
-      security:
-      - coffeemachine_auth:
-        - write:machines
-        - read:machines
-    put:
-      tags:
-      - machine
-      summary: Update an existing machine
-      operationId: updateMachine
-      consumes:
-      - application/json
-      - application/xml
-      produces:
-      - application/json
-      - application/xml
-      parameters:
-      - in: body
-        name: body
-        description: Machine object that needs to be updated
-        required: true
-        schema:
-          $ref: '#/definitions/Machine'
-      responses:
-        400:
-          description: Invalid ID supplied
-        404:
-          description: Machine not found
-        405:
-          description: Validation exception
-      security:
-      - coffeemachine_auth:
-        - write:machines
-        - read:machines
     get:
       tags:
       - machine
       summary: Get all machines
-      operationId: allMachines
+      operationId: getMachines
       produces:
       - application/json
       description: Return a list of all machines
@@ -213,87 +76,367 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Machine'
+      security:
+        - ApiJwtAuth: []
+    post:
+      tags:
+      - machine
+      summary: Add a new machine
+      operationId: createMachine
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Machine object that needs to be added
+        required: true
+        schema:
+          $ref: '#/definitions/Machine'
+      responses:
+        201:
+          description: Successfully saved the machine
+          schema:
+            $ref: '#/definitions/Machine'
+        422:
+          description: Failed to save the machine
+      security:
+        - ApiJwtAuth: []
+    put:
+      tags:
+      - machine
+      summary: Update an existing machine
+      operationId: updateMachine
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: Machine object that needs to be updated
+        required: true
+        schema:
+          $ref: '#/definitions/Machine'
+      responses:
+        200:
+          description: Sucessfully updated machine
+          schema:
+            $ref: '#/definitions/Machine'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Machine not found
+        422:
+          description: Failed to update the machine
+      security:
+        - ApiJwtAuth: []
+
+
+  /machine/{machineId}:
+    get:
+      tags:
+      - machine
+      summary: Returns a single machine
+      operationId: getMachine
+      produces:
+      - application/json
+      parameters:
+      - name: machineId
+        in: path
+        description: ID of machine that needs to be fetched
+        required: true
+        type: string
+        format: uuid
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Machine'
+        400:
+          description: Invalid ID supplied
+      security:
+        - ApiJwtAuth: []
 
 
   /machine/{machineId}/coffee:
     get:
       tags:
       - machine
-      summary: Returns coffees produced by a specific machine
-      operationId: getCoffeesOfMachine
+      summary: Returns all coffees produced by a specific machine in a specific time frame
+      operationId: getMachineCoffees
       produces:
       - application/json
       parameters:
       - name: machineId
         in: path
-        description: ID of machine for which we want to get all coffees
+        description: ID of machine that needs to be fetched
         required: true
         type: string
+        format: uuid
+      - name: after
+        in: query
+        type: string
+        format: date-time
+        description: timestamp after which the coffee should have been produced
+      - name: before
+        in: query
+        type: string
+        format: date-time
+        description: timestamp before which the coffee should have been produced
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Coffee'
+        400:
+          description: Invalid ID supplied
+      security:
+        - ApiJwtAuth: []
+
+
+
+  /user:
+    get:
+      tags:
+      - user
+      summary: Get all users
+      operationId: getUsers
+      produces:
+      - application/json
+      description: Return a list of all users
       responses:
         200:
           description: OK
           schema:
             type: array
             items:
-              $ref: '#/definitions/Coffee'
-        400:
-          description: No machine with the given id exists
+              $ref: '#/definitions/User'
       security:
-      - api_key: []
+        - ApiJwtAuth: []
+    post:
+      tags:
+      - user
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: registerUser
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: User object that needs to be created
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: Invalid data supplied
+        409:
+          description: Email address already taken
+  /login:
+    post:
+      tags:
+      - user
+      summary: Logs user into the system
+      operationId: login
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        description: User object that wants to login
+        required: true
+        schema:
+          type: object
+          properties:
+            email:
+              type: string
+              example: user@example.com
+            password:
+              type: string
+              example: userPassword
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+        401:
+          description: Invalid data supplied
+  /user/{userId}:
+    get:
+      tags:
+      - user
+      summary: Get user by user name
+      operationId: getUserByName
+      produces:
+      - application/json
+      parameters:
+      - name: userId
+        in: path
+        description: The id that needs to be fetched.
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: User not found
+      security:
+        - ApiJwtAuth: []
+    put:
+      tags:
+      - user
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      produces:
+      - application/json
+      parameters:
+      - name: userId
+        in: path
+        description: The id that needs to be fetched.
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: Updated user object
+        required: true
+        schema:
+          $ref: '#/definitions/User'
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: User not found
+      security:
+        - ApiJwtAuth: []
+    delete:
+      tags:
+      - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      produces:
+      - application/json
+      parameters:
+      - name: userId
+        in: path
+        description: The id belonging to the user that needs to be deleted.
+        required: true
+        type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: User not found
+      security:
+        - ApiJwtAuth: []
 
 
 securityDefinitions:
-  coffeemachine_auth:
-    type: oauth2
-    authorizationUrl: http://coffeemachine.swagger.io/oauth/dialog
-    flow: implicit
-    scopes:
-      write:coffees: modify coffees in your account
-      read:coffees: read your coffees
-      write:machines: modify machines in your account
-      read:machines: read your machines
-  api_key:
+  ApiJwtAuth:
     type: apiKey
-    name: api_key
     in: header
+    name: Authorization
 definitions:
   Coffee:
     type: object
-    required:
-    - machine
     properties:
       id:
-        type: integer
-        format: int64
+        type: string
+        format: uuid
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time
       machine:
         $ref: '#/definitions/Machine'
-      status:
-        type: string
-        description: coffee status, in case something goes wrong
-        enum:
-        - canceled
-        - produced
-        - consumed
-        default: consumed
   Machine:
     type: object
     required:
     - name
+    - sensorIdentifier
     properties:
       id:
-        type: integer
-        format: int64
+        type: string
+        format: uuid
       name:
         type: string
-        example: coffee machine
         description: Name of tha machine, in order for the user to be able to identify it.
+        example: coffee machine
+      sensorIdentifier:
+        type: string
+        description: Bluetooth id of the sensor
+        example: d1:d9:9f:36:cf:93
       active:
         type: boolean
         default: true
         description: If the thingy is moved to another machine, this one has to be deactivated.
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time
+      coffees:
+        type: array
+        items:
+          $ref: '#/definitions/Coffee'
+      maintenanceThreshold:
+        type: integer
+        description: How many coffees can be produced before the machine requires maintenance. (nullable)
+      calibrated:
+        type: boolean
+        description: Is this machine calibrated. (nullable)
+  User:
+    type: object
+    required:
+    - name
+    - email
+    - hashedPassword
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        example: "Test User"
+      email:
+        type: string
+        format: email
+        minLength: 5
+        maxLength: 100
+        example: "user@example.com"
+      hashedPassword:
+        type: string
+        example: "userPassword"
+      active:
+        type: boolean
+        default: true
+      createdAt:
+        type: string
+        format: date-time
+      updatedAt:
+        type: string
+        format: date-time
 
-# Added by API Auto Mocking Plugin
-host: virtserver.swaggerhub.com
-basePath: /gcorsini/thingy-api-red/1.0
-schemes:
- - https
