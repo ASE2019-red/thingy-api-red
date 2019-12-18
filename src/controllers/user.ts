@@ -50,6 +50,28 @@ export default class UserController {
         const newUser = new User();
         const body = ctx.request.body;
         console.log('Body: ', body);
+        if (!body.name) {
+            ctx.status = 400;
+            ctx.body = 'Field name is required.';
+            return;
+        }
+        if (!body.email) {
+            ctx.status = 400;
+            ctx.body = 'Field email is required.';
+            return;
+        }
+        if (!body.psw) {
+            ctx.status = 400;
+            ctx.body = 'Field psw is required.';
+            return;
+        }
+
+        const existingUser = await UserController.repository.findOne({email: body.email});
+        if (!!existingUser) {
+            ctx.status = 409;
+            ctx.body = 'Email address is already taken.';
+            return;
+        }
         newUser.name = body.name;
         newUser.email = body.email;
         newUser.hashedPassword = await bcrypt.hash(body.psw, UserController.hashRounds);
