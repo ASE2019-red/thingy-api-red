@@ -4,6 +4,8 @@
 
 Before starting the server, copy .env.example as .env and fill in the TODO fields
 
+Not mandatory is NODE_RED_SLACK_WEBHOOK
+
 If you want to seed some test data run:
 
     $ docker-compose up -d postgres influx
@@ -18,12 +20,21 @@ It's possible to startup the application stack with docker-compose:
     $ docker-compuse up -d # Starts the three services postgres, influx and api
 
 ### Production
-To use the docker-compose stack in production, run the following:
+The whole stack is automatically deployed to a live server server on each pull request
+or commit to master
 
-    $ cd <data-dir-with-dotenv>
-    $ docker image pull ase2019red/thingy-api-red
-    $ docker-compose -f <path-to-compose-file> up -d
+To deploy the docker-compose stack manually to production, run the following:
+    $ export DOCKER_HOST=ssh://root@{server-ip}
+    $ docker stack deploy --compose-file docker-compose-production.yaml thingy-api-red
 
+You need to have passwordless access on the server (i.e. via key file)
+
+## Testing
+To run all tests:
+    $ docker-compose up -d postgres influx
+    $ npm run test
+
+All tests are automatically run on github for each commit
 
 ## API
 The definition of the API can be found in the [swagger.yaml](./swagger.yaml) file. If the API is running, this definition is displayed at its [root](http://localhost:8000/).
@@ -62,7 +73,6 @@ For more information visit https://docs.influxdata.com/influxdb/v1.7/introductio
 the InfluxDB Docker Image can be found under https://hub.docker.com/_/influxdb/.
 
 #### Cleanup Docker volumes (local development)
-To cleanup stored content which is stored inside the named volume called `influx_data`, you can execute the following command:
+To cleanup all volumes:
 
-    $ docker-compose rm -svf influx     # Stops the InfluxDB first
-    $ docker volume rm -f influx_data   # Removes the stored data
+    $ docker-compose down --volumes
