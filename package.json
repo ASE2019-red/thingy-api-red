@@ -42,7 +42,7 @@
     "tslint": "^5.20.0",
     "typeorm": "0.2.20",
     "typescript": "^3.6.4",
-    "ws": "7.2.0"
+    "ws": "7.4.6"
   },
   "dependencies": {
     "@koa/cors": "2.2.3",
