@@ -60,6 +60,6 @@
     "passport-local": "1.0.0",
     "swagger-ui": "^3.24.3",
     "koa2-swagger-ui": "2.15.4",
-    "moment": "2.24.0"
+    "moment": "2.29.2"
   }
 }
