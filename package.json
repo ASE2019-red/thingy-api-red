@@ -30,7 +30,7 @@
     "@types/supertest": "2.0.8",
     "@types/ws": "6.0.3",
     "async-mqtt": "2.4.2",
-    "class-validator": "0.10.2",
+    "class-validator": "0.14.0",
     "dotenv": "8.2.0",
     "influx": "5.4.2",
     "jest": "24.9.0",
